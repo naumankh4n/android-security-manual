@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Android security field manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12151a;
+    --panel:#181d24;
+    --panel-alt:#1e242c;
+    --border:#2a3139;
+    --text:#e9ecef;
+    --text-dim:#8c96a3;
+    --text-faint:#5c6672;
+    --accent:#c9a227;
+    --accent-soft:rgba(201,162,39,.13);
+    --accent-dim:rgba(201,162,39,.35);
+    --danger:#c4483a;
+    --danger-soft:rgba(196,72,58,.14);
+    --safe:#3e8e7e;
+    --safe-soft:rgba(62,142,126,.15);
+    --radius:10px;
+    --sans:'IBM Plex Sans',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  button{font-family:inherit;}
+  ::selection{background:var(--accent-soft);}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* ---------- header ---------- */
+  header.top{
+    border-bottom:1px solid var(--border);
+    padding:28px clamp(16px,4vw,40px) 22px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:24px;
+    align-items:flex-end;
+    justify-content:space-between;
+    background:
+      radial-gradient(ellipse at top left, rgba(201,162,39,.06), transparent 55%),
+      var(--bg);
+  }
+  .brand h1{
+    font-size:clamp(26px,3.4vw,34px);
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin:0 0 6px;
+  }
+  .brand p{
+    margin:0;
+    color:var(--text-dim);
+    font-size:15px;
+    max-width:52ch;
+  }
+  .stats{
+    display:flex;
+    gap:28px;
+    align-items:center;
+  }
+  .stat{min-width:96px;}
+  .stat .num{
+    font-family:var(--mono);
+    font-size:22px;
+    font-weight:600;
+    color:var(--accent);
+  }
+  .stat .lbl{
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
+  .progress-track{
+    width:150px;
+    height:6px;
+    border-radius:99px;
+    background:var(--panel-alt);
+    overflow:hidden;
+    margin-top:6px;
+    border:1px solid var(--border);
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--accent),#e0be55);
+    width:0%;
+    transition:width .5s ease;
+  }
+  @media (prefers-reduced-motion:reduce){ .progress-fill{transition:none;} }
+
+  /* ---------- layout ---------- */
+  .layout{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    max-width:1180px;
+    margin:0 auto;
+  }
+  @media (max-width:860px){
+    .layout{grid-template-columns:1fr;}
+  }
+
+  /* ---------- sidebar ---------- */
+  nav.side{
+    border-right:1px solid var(--border);
+    padding:22px 14px;
+    position:sticky;
+    top:0;
+    align-self:start;
+    max-height:100vh;
+    overflow-y:auto;
+  }
+  @media (max-width:860px){
+    nav.side{
+      position:static;
+      border-right:none;
+      border-bottom:1px solid var(--border);
+      max-height:none;
+      padding:14px 16px;
+    }
+    .nav-tree{display:flex;flex-wrap:wrap;gap:8px;}
+    .nav-tree li{width:auto !important;}
+  }
+  .side-group-label{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--text-faint);
+    padding:4px 10px 8px;
+  }
+  ul.nav-tree{list-style:none;margin:0 0 18px;padding:0;}
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    width:100%;
+    background:none;
+    border:1px solid transparent;
+    color:var(--text-dim);
+    text-align:left;
+    padding:8px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+    margin-bottom:2px;
+  }
+  .nav-item .glyph{
+    font-size:13px;
+    color:var(--text-faint);
+    width:16px;
+    text-align:center;
+  }
+  .nav-item .name{flex:1;}
+  .nav-item .count{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--text-faint);
+  }
+  .nav-item:hover{background:var(--panel);color:var(--text);}
+  .nav-item.active{
+    background:var(--panel-alt);
+    border-color:var(--border);
+    color:var(--text);
+  }
+  .nav-item.active .glyph{color:var(--accent);}
+  .nav-mini-bar{
+    height:3px;border-radius:99px;background:var(--border);
+    margin-top:5px;overflow:hidden;
+  }
+  .nav-mini-fill{height:100%;background:var(--safe);}
+  .nav-item-wrap{margin-bottom:3px;}
+
+  /* ---------- main ---------- */
+  main{padding:26px clamp(16px,4vw,40px) 60px;min-width:0;}
+
+  .toolbar{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-bottom:22px;
+  }
+  .search-wrap{
+    flex:1;
+    min-width:200px;
+    position:relative;
+  }
+  .search-wrap input{
+    width:100%;
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:10px 14px 10px 34px;
+    border-radius:8px;
+    font-size:14.5px;
+    font-family:var(--sans);
+  }
+  .search-wrap input::placeholder{color:var(--text-faint);}
+  .search-wrap::before{
+    content:"⌕";
+    position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    color:var(--text-faint);font-size:15px;
+  }
+  .mode-toggle{
+    display:flex;
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .mode-toggle button{
+    background:var(--panel);
+    color:var(--text-dim);
+    border:none;
+    padding:9px 16px;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  .mode-toggle button.active{
+    background:var(--accent-soft);
+    color:var(--accent);
+  }
+  .shuffle-btn{
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    border-radius:8px;
+    padding:9px 13px;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .shuffle-btn:hover{color:var(--text);}
+
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .section-head h2{
+    font-size:19px;
+    font-weight:600;
+    margin:0;
+  }
+  .section-head .sub{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text-faint);
+  }
+
+  /* ---------- flashcard ---------- */
+  .card-stage{
+    perspective:1400px;
+    margin-bottom:18px;
+  }
+  .flashcard{
+    position:relative;
+    min-height:220px;
+    border-radius:14px;
+    cursor:pointer;
+    transform-style:preserve-3d;
+    transition:transform .45s cubic-bezier(.2,.8,.2,1);
+  }
+  .flashcard.flipped{transform:rotateY(180deg);}
+  @media (prefers-reduced-motion:reduce){ .flashcard{transition:none;} }
+  .face{
+    position:absolute;inset:0;
+    backface-visibility:hidden;
+    border-radius:14px;
+    border:1px solid var(--border);
+    padding:30px 32px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    background:var(--panel);
+  }
+  .face.back{
+    transform:rotateY(180deg);
+    background:var(--panel-alt);
+    justify-content:flex-start;
+    padding-top:26px;
+  }
+  .card-tag{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--accent);
+    margin-bottom:14px;
+    letter-spacing:.01em;
+  }
+  .card-q{
+    font-size:21px;
+    font-weight:600;
+    line-height:1.35;
+  }
+  .card-hint{
+    position:absolute;bottom:16px;right:20px;
+    font-size:12px;color:var(--text-faint);
+  }
+  .card-a-label{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--safe);
+    margin-bottom:8px;
+  }
+  .card-a{
+    font-size:16px;
+    color:var(--text);
+    line-height:1.6;
+  }
+
+  .card-controls{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .ctrl-btn{
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    border-radius:8px;
+    padding:9px 15px;
+    font-size:13.5px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .ctrl-btn:hover{color:var(--text);border-color:var(--text-faint);}
+  .ctrl-btn.known{color:var(--safe);border-color:var(--safe-soft);background:var(--safe-soft);}
+  .ctrl-btn.flag{color:var(--danger);}
+  .ctrl-spacer{flex:1;}
+  .pos-indicator{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text-faint);
+  }
+  .empty-note{color:var(--text-dim);font-size:14px;padding:20px 0;}
+
+  /* ---------- browse accordion ---------- */
+  .qa-item{
+    border:1px solid var(--border);
+    border-radius:10px;
+    margin-bottom:10px;
+    background:var(--panel);
+    overflow:hidden;
+  }
+  .qa-head{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 16px;
+    cursor:pointer;
+  }
+  .qa-check{
+    width:17px;height:17px;
+    border-radius:5px;
+    border:1.5px solid var(--text-faint);
+    flex:none;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;
+    color:transparent;
+  }
+  .qa-check.on{
+    background:var(--safe-soft);
+    border-color:var(--safe);
+    color:var(--safe);
+  }
+  .qa-q{flex:1;font-size:15px;font-weight:500;}
+  .qa-cat{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-faint);
+    white-space:nowrap;
+  }
+  .qa-arrow{color:var(--text-faint);transition:transform .2s;font-size:13px;}
+  .qa-item.open .qa-arrow{transform:rotate(90deg);}
+  .qa-body{
+    display:none;
+    padding:0 16px 18px 45px;
+    color:var(--text-dim);
+    font-size:14.5px;
+    line-height:1.6;
+  }
+  .qa-item.open .qa-body{display:block;}
+
+  /* ---------- scenarios ---------- */
+  .scenario{
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:var(--panel);
+    margin-bottom:14px;
+    overflow:hidden;
+  }
+  .scenario-head{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    padding:18px 20px;
+    cursor:pointer;
+  }
+  .scenario-badge{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--bg);
+    background:var(--accent);
+    border-radius:6px;
+    padding:3px 8px;
+    flex:none;
+    margin-top:2px;
+  }
+  .scenario-prompt{font-size:15.5px;font-weight:500;flex:1;}
+  .scenario-body{
+    display:none;
+    padding:0 20px 20px 20px;
+    border-top:1px solid var(--border);
+  }
+  .scenario.open .scenario-body{display:block;padding-top:16px;}
+  .scenario.open .qa-arrow{transform:rotate(90deg);}
+  .step-row{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    padding:8px 0;
+  }
+  .step-check{
+    width:16px;height:16px;margin-top:3px;
+    border-radius:4px;border:1.5px solid var(--text-faint);
+    flex:none;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;color:transparent;
+    cursor:pointer;
+  }
+  .step-check.on{background:var(--safe-soft);border-color:var(--safe);color:var(--safe);}
+  .step-text{font-size:14.5px;color:var(--text-dim);line-height:1.55;}
+  .step-row.on .step-text{color:var(--text);}
+
+  /* ---------- priority ---------- */
+  .priority-band{
+    border:1px solid var(--accent-dim);
+    background:linear-gradient(180deg,var(--accent-soft),transparent 60%);
+    border-radius:12px;
+    padding:20px 20px 8px;
+    margin-bottom:26px;
+  }
+  .priority-band h2{font-size:17px;margin:0 0 4px;}
+  .priority-band .sub{color:var(--text-dim);font-size:13.5px;margin-bottom:14px;}
+  .priority-list{list-style:none;margin:0;padding:0;}
+  .priority-list li{
+    display:flex;align-items:center;gap:12px;
+    padding:10px 0;
+    border-top:1px solid var(--border);
+  }
+  .priority-list li:first-child{border-top:none;}
+  .priority-check{
+    width:17px;height:17px;border-radius:5px;
+    border:1.5px solid var(--accent-dim);
+    flex:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;color:transparent;
+  }
+  .priority-check.on{background:var(--accent);border-color:var(--accent);color:var(--bg);}
+  .priority-text{flex:1;font-size:14.5px;}
+  .priority-go{
+    font-family:var(--mono);
+    font-size:12px;color:var(--accent);
+    background:none;border:1px solid var(--accent-dim);
+    border-radius:6px;padding:5px 10px;cursor:pointer;
+  }
+
+  .empty-search{
+    color:var(--text-dim);
+    font-size:14.5px;
+    padding:30px 0;
+  }
+  footer.foot{
+    text-align:center;
+    color:var(--text-faint);
+    font-size:12.5px;
+    padding:30px 20px 50px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <h1>Android security field manual</h1>
+    <p>A working set of drills for mobile app pentest interviews — manifest analysis, storage, network, components, auth, instrumentation, root, and deep links, with practice scenarios.</p>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="num" id="statKnown">0</div>
+      <div class="lbl">reviewed</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="statTotal">0</div>
+      <div class="lbl">total drills</div>
+    </div>
+    <div class="stat" style="min-width:150px;">
+      <div class="lbl" id="statPct">0% covered</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="side">
+    <div class="side-group-label">study areas</div>
+    <ul class="nav-tree" id="navTree"></ul>
+    <div class="side-group-label">practice</div>
+    <ul class="nav-tree" id="navExtra"></ul>
+  </nav>
+
+  <main>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="Search every question and answer…">
+      </div>
+      <div class="mode-toggle" id="modeToggle">
+        <button data-mode="study" class="active">Study</button>
+        <button data-mode="browse">Browse</button>
+      </div>
+      <button class="shuffle-btn" id="shuffleBtn">⤨ shuffle</button>
+    </div>
+
+    <div id="priorityBand"></div>
+    <div id="viewRoot"></div>
+    <footer class="foot">Progress is saved to this artifact automatically — close it and come back whenever.</footer>
+  </main>
+</div>
+
+<script>
+/* ============================= DATA ============================= */
+const DATA = {
+  fundamentals: { name:`Android fundamentals`, glyph:`▣`, items:[
+    {id:`fu1`,q:`What is Android architecture?`,a:`A layered stack: Linux kernel at the base, then the hardware abstraction layer and native libraries plus the ART runtime, then the Java/Kotlin API framework, then system and user apps on top. Every app runs sandboxed in its own process with its own Linux UID, enforced by SELinux and standard Linux permissions.`},
+    {id:`fu2`,q:`What is an APK?`,a:`Android Package — a signed zip archive that bundles an app's compiled code, resources, and manifest into the single installable, distributable unit for Android.`},
+    {id:`fu3`,q:`What is inside an APK?`,a:`classes.dex (compiled bytecode), AndroidManifest.xml (binary XML), the res folder for resources, lib for native .so libraries per CPU architecture, assets for raw files, and META-INF holding the signing certificate and manifest hashes.`},
+    {id:`fu4`,q:`What is AndroidManifest.xml?`,a:`The declaration file every APK ships with: package name, declared components, requested and defined permissions, min and target SDK, and each component's exported status. It is effectively the map of an app's attack surface.`},
+    {id:`fu5`,q:`What are the four main Android components?`,a:`Activity, Service, Broadcast Receiver, and Content Provider.`},
+    {id:`fu6`,q:`What is an Activity?`,a:`A single screen of user interface and the entry point for user interaction with an app.`},
+    {id:`fu7`,q:`What is a Service?`,a:`A component that performs long-running work in the background without a user interface, such as playing audio or syncing data.`},
+    {id:`fu8`,q:`What is a Broadcast Receiver?`,a:`A component that listens for and reacts to system-wide or app-specific broadcast events, without any UI of its own.`},
+    {id:`fu9`,q:`What is a Content Provider?`,a:`A component that manages and exposes structured app data through a URI-based interface, usually backed by SQLite. It is the standard way apps share structured data with other apps over IPC.`},
+    {id:`fu10`,q:`What is an Intent?`,a:`A messaging object used to request an action from another component — either explicit, naming the exact target, or implicit, describing an action for the system to resolve.`},
+    {id:`fu11`,q:`What is an Intent Extra?`,a:`A key-value bundle attached to an Intent that carries extra data to the component receiving it.`},
+    {id:`fu12`,q:`What is Android IPC?`,a:`Inter-process communication — the mechanisms, chiefly Binder underneath Intents and Content Providers, that let components talk to each other even across separate app processes.`},
+    {id:`fu13`,q:`How do Android components communicate with each other?`,a:`Through Intents resolved by the system's ActivityManager and PackageManager, riding on Binder IPC underneath, or through Content Provider queries for structured data.`},
+    {id:`fu14`,q:`What does android:exported=true mean?`,a:`It marks a component as reachable by other apps on the device — any installed app can invoke it directly, not just the app that owns it.`},
+    {id:`fu15`,q:`When can an exported component become a security vulnerability?`,a:`When it performs a privileged action, returns sensitive data, or trusts input without verifying the caller's identity or permissions — any app on the device can then invoke it directly and skip whatever flow or authentication the UI would normally enforce.`},
+    {id:`fu16`,q:`What is an explicit Intent vs implicit Intent?`,a:`An explicit Intent names the exact target component by package and class. An implicit Intent only declares an action, category, or data type and lets the system resolve it, which means any app registering a matching filter could receive it.`},
+    {id:`fu17`,q:`What are permissions in Android?`,a:`Declared capabilities that gate access to sensitive APIs or data. Apps request them in the manifest and the OS enforces them at call time.`},
+    {id:`fu18`,q:`What is a custom permission?`,a:`A permission an app defines itself, used to protect its own exported components so that only apps holding that permission can interact with them.`},
+    {id:`fu19`,q:`What is a dangerous permission?`,a:`A permission that grants access to sensitive user data or device capability — contacts, location, camera, SMS — and therefore requires explicit runtime consent from the user rather than being auto-granted.`},
+    {id:`fu20`,q:`What is the difference between normal and dangerous permissions?`,a:`Normal permissions cover low-risk capability (like internet access) and are auto-granted at install time. Dangerous permissions cover higher-risk data or capability and require the user to explicitly approve them at runtime.`},
+  ]},
+  staticAnalysis: { name:`APK static analysis`, glyph:`▤`, items:[
+    {id:`sa1`,q:`Walk me through your methodology for testing an APK.`,a:`Recon on the package and SDK levels, static analysis of the manifest and decompiled code, environment setup for interception and instrumentation, dynamic analysis while exercising app flows, direct probing of exported components, business-logic and authorization testing against the backend, then a report with severity and proof of concept for each finding.`},
+    {id:`sa2`,q:`What do you look for during static analysis?`,a:`Manifest exposure, hardcoded secrets, insecure cryptography, insecure storage patterns, exported components, risky third-party SDKs, debug flags, and how much the app is obfuscated.`},
+    {id:`sa3`,q:`What do you look for in the Manifest?`,a:`Exported components without permission checks, the allowBackup and debuggable flags, dangerous permissions requested, deep link intent filters, minSdkVersion, and any referenced network security configuration.`},
+    {id:`sa4`,q:`How do you identify exported Activities?`,a:`Check each activity entry in the manifest for exported=true, or an intent filter present without an explicit exported=false on newer target SDKs, using a manifest dump from apktool or jadx.`},
+    {id:`sa5`,q:`How do you identify exported Services?`,a:`Same approach as activities — look for service entries with exported=true or an intent filter attached.`},
+    {id:`sa6`,q:`How do you identify exported Broadcast Receivers?`,a:`Look for receiver entries with exported=true or an intent filter, paying particular attention to ones registered for system broadcasts.`},
+    {id:`sa7`,q:`How do you identify exported Content Providers?`,a:`Look for provider entries with exported=true, and note the authorities, any permission attributes, and grantUriPermissions settings.`},
+    {id:`sa8`,q:`How do you look for hardcoded secrets?`,a:`Grep the decompiled source and string resources for API keys, tokens, backend URLs, cloud provider keys, and private keys, and check strings.xml and BuildConfig for anything baked in at compile time.`},
+    {id:`sa9`,q:`What sensitive information might be accidentally stored in an APK?`,a:`API keys, backend endpoints, encryption keys, hardcoded credentials, debug or staging endpoints, PII left over in test data, and third-party SDK secrets.`},
+    {id:`sa10`,q:`How do you identify API keys in an APK?`,a:`Pattern-match known key formats across strings and resources, using tools such as MobSF, apkleaks, or a secret-scanning grep pass over the decompiled output.`},
+    {id:`sa11`,q:`How do you identify hardcoded credentials?`,a:`Search decompiled code and config files for username and password pairs, basic-auth strings, and default credentials left in shared preferences or resource files.`},
+    {id:`sa12`,q:`How do you identify insecure cryptographic implementations?`,a:`Look for ECB mode, static or hardcoded keys and IVs, weak algorithms like DES, MD5, or SHA1 used for security purposes, and any custom crypto rolled instead of a vetted library.`},
+    {id:`sa13`,q:`What is decompilation?`,a:`Reversing compiled DEX bytecode back into readable Java-like source, or into smali, so the app's logic can be inspected without the original source.`},
+    {id:`sa14`,q:`What tools do you use for APK analysis?`,a:`JADX and apktool for static decompilation, MobSF for automated scanning, and Frida, Objection, and Burp Suite for dynamic work.`},
+    {id:`sa15`,q:`What are JADX, apktool and MobSF used for?`,a:`JADX decompiles DEX straight to readable Java for source review. Apktool decodes resources and the manifest and disassembles code to smali for inspection or patching and rebuilding. MobSF wraps much of this into an automated static and dynamic scanning pipeline with reporting.`},
+    {id:`sa16`,q:`What is smali?`,a:`A human-readable, assembly-like representation of Dalvik bytecode, used when full Java decompilation fails or when an APK needs to be patched and rebuilt.`},
+    {id:`sa17`,q:`How would you analyze an APK if the source code isn't available?`,a:`Decompile it with JADX and apktool, read through the manifest and the recovered Java or smali, then move to dynamic analysis with Frida to confirm what the static read-through suggested.`},
+  ]},
+  storage: { name:`Data and storage`, glyph:`▥`, items:[
+    {id:`st1`,q:`What is insecure data storage?`,a:`Storing sensitive data on-device without adequate protection — plaintext files, weakly-permissioned SharedPreferences, or unencrypted databases — so that it can be extracted through backup, root access, or physical access to the device.`},
+    {id:`st2`,q:`Where can Android applications store data?`,a:`SharedPreferences, internal and external files, SQLite databases, the Android Keystore, external or SD card storage, and cache directories.`},
+    {id:`st3`,q:`What is SharedPreferences?`,a:`A simple key-value XML storage mechanism apps use for settings and small pieces of data, stored by default in the app's private data directory.`},
+    {id:`st4`,q:`Why is storing sensitive information in SharedPreferences risky?`,a:`It is stored as plaintext XML on disk, so it is readable on a rooted device, extractable through an ADB backup, or exposed if the file mode is ever misconfigured.`},
+    {id:`st5`,q:`What is Android Keystore?`,a:`A system-backed secure store for cryptographic keys that ties key material to hardware-backed security, such as a trusted execution environment or StrongBox, so keys cannot be extracted even with root access.`},
+    {id:`st6`,q:`How should authentication tokens be stored?`,a:`Behind Android Keystore-backed encryption, such as EncryptedSharedPreferences or the Jetpack Security library, rather than as plaintext, and issued with a short lifetime.`},
+    {id:`st7`,q:`What sensitive data would you search for on the filesystem?`,a:`Tokens, session identifiers, PII, cached API responses, cryptographic keys, and any secrets sitting under the app's private data directory.`},
+    {id:`st8`,q:`What is SQLite database security?`,a:`By default SQLite databases are stored unencrypted in the app's private storage. Sensitive data should be encrypted with something like SQLCipher, and any Content Provider queries against the database should be checked for SQL injection.`},
+    {id:`st9`,q:`What is backup-related data exposure?`,a:`Android's ADB backup or cloud auto-backup mechanisms can extract an app's data — including SharedPreferences and databases — if backup isn't disabled, letting an attacker with physical or ADB access exfiltrate sensitive data without needing root.`},
+    {id:`st10`,q:`What is android:allowBackup?`,a:`A manifest flag controlling whether an app's data can be included in device backups. Leaving it true risks sensitive data being pulled off the device through backup rather than requiring root.`},
+    {id:`st11`,q:`What is insecure logging?`,a:`Writing sensitive data such as tokens, PII, or detailed stack traces to Logcat, where it can be read by other apps with legacy log-read permission or by anyone with adb logcat access.`},
+    {id:`st12`,q:`What sensitive information might appear in Logcat?`,a:`Auth tokens, passwords, session identifiers, raw API responses, PII, and crash output that reveals internal implementation details.`},
+    {id:`st13`,q:`How would you test whether an app leaks sensitive data through logs?`,a:`Trigger login and other sensitive flows while tailing adb logcat, and grep the output for tokens, credentials, and PII-shaped strings.`},
+  ]},
+  network: { name:`Network security`, glyph:`◈`, items:[
+    {id:`nt1`,q:`How would you configure Burp Suite for Android testing?`,a:`Point the device's Wi-Fi proxy at Burp's IP and port, install Burp's CA certificate on the device, and route the device's traffic through the proxy — as a user certificate on stock devices, or a system certificate on rooted ones for newer Android versions.`},
+    {id:`nt2`,q:`Why might HTTPS traffic not appear in Burp?`,a:`The app may not trust Burp's CA because its network security config ignores user-installed certificates on target SDK 24 and above, it may use certificate pinning, or the traffic might bypass the proxy entirely through a native library or VPN conflict.`},
+    {id:`nt3`,q:`What is TLS certificate validation?`,a:`The process where a client verifies a server's certificate chain against trusted certificate authorities and checks the hostname before trusting the connection, which is what prevents a man-in-the-middle.`},
+    {id:`nt4`,q:`What is certificate pinning?`,a:`Hardcoding or validating a specific expected certificate or public key rather than trusting any certificate signed by a trusted CA, so only that exact server certificate is accepted.`},
+    {id:`nt5`,q:`Why do applications use certificate pinning?`,a:`To prevent interception even from a compromised or maliciously installed CA — including a pentesting proxy's certificate — protecting the app from traffic interception beyond what standard TLS trust alone provides.`},
+    {id:`nt6`,q:`How would you test an application with certificate pinning?`,a:`Bypass it with Frida scripts such as frida-multiple-unpinning, use Objection's built-in pinning-disable command, or patch the APK to remove the pinning check, then route traffic through Burp as usual.`},
+    {id:`nt7`,q:`Is certificate pinning bypass itself a vulnerability?`,a:`No — bypassing pinning is a testing technique that requires local control of the device through root or Frida, so it isn't remotely exploitable on its own. Weak or absent pinning is still a legitimate finding for MITM exposure.`},
+    {id:`nt8`,q:`What is cleartext HTTP traffic?`,a:`Traffic sent unencrypted, which lets anyone on the network path eavesdrop or tamper with it.`},
+    {id:`nt9`,q:`How would you check whether an application allows cleartext traffic?`,a:`Inspect the network security configuration and the manifest's usesCleartextTraffic setting, and confirm in practice by forcing an HTTP request through Burp to see whether the app accepts it.`},
+    {id:`nt10`,q:`What is a Network Security Configuration?`,a:`An XML configuration file that lets developers control TLS trust anchors, cleartext policy, and pinning on a per-domain basis, referenced from the manifest.`},
+    {id:`nt11`,q:`What happens if an app trusts user-installed CA certificates?`,a:`An attacker, or a pentester, with a rogue CA installed on the device can transparently intercept and modify traffic — a weakness if that trust wasn't intentionally scoped for production.`},
+    {id:`nt12`,q:`What is hostname verification?`,a:`Checking that a certificate's common name or subject alternative names match the requested hostname, which stops a valid-but-wrong certificate from being used in a man-in-the-middle attack.`},
+    {id:`nt13`,q:`What TLS-related issues would you look for?`,a:`Weak TLS versions or cipher suites, missing hostname verification, a custom TrustManager that accepts any certificate, no pinning on sensitive endpoints, and mixed content.`},
+  ]},
+  components: { name:`Component vulnerabilities`, glyph:`▦`, items:[
+    {id:`cv1`,q:`What is an exported Activity vulnerability?`,a:`An exported Activity that performs a sensitive action — authentication, payment, displaying private data — reachable by any app through an Intent, bypassing the app's normal flow or authentication.`},
+    {id:`cv2`,q:`How would you test an exported Activity?`,a:`Launch it directly with adb shell am start, naming the package and activity, with crafted extras, and observe whether it exposes data or skips a check it shouldn't.`},
+    {id:`cv3`,q:`What is an Activity that trusts an Intent Extra?`,a:`An Activity that reads a value like a user ID or an admin flag from an Intent Extra and acts on it without verifying who sent it, letting another app on the device manipulate that state.`},
+    {id:`cv4`,q:`How can Intent Extras cause authorization problems?`,a:`A malicious app can pass extras that flip a privilege flag or swap an object ID the component trusts implicitly, achieving something like local IDOR or privilege escalation without touching the backend.`},
+    {id:`cv5`,q:`What is an insecure Broadcast Receiver?`,a:`An exported receiver that acts on broadcast data without validating the sender or the content, or that lacks a permission requirement on who can send it broadcasts.`},
+    {id:`cv6`,q:`What is Broadcast Receiver spoofing?`,a:`A malicious app sends a crafted broadcast that matches the receiver's intent filter to trigger unintended behavior or inject attacker-controlled data.`},
+    {id:`cv7`,q:`What is a vulnerable Content Provider?`,a:`An exported provider that lacks proper permission checks or input validation on the queries it serves.`},
+    {id:`cv8`,q:`How can a Content Provider expose sensitive data?`,a:`If it's exported without permission enforcement, any app on the device can query, read, or write the URIs it serves — contacts, files, or database rows.`},
+    {id:`cv9`,q:`What is path traversal in a Content Provider?`,a:`Manipulating a file-based URI, for example inserting parent-directory sequences, to reach files outside the directory the provider intended to expose through openFile.`},
+    {id:`cv10`,q:`What is Service hijacking?`,a:`Binding to or starting an exported Service directly to trigger its privileged functionality without going through the app's intended UI or authentication.`},
+    {id:`cv11`,q:`What is Intent redirection?`,a:`A vulnerable component takes an attacker-supplied Intent — often passed in as an Extra — and forwards it to startActivity, letting the attacker launch arbitrary internal components with the vulnerable app's own privileges.`},
+    {id:`cv12`,q:`What is an implicit Intent vulnerability?`,a:`Implicit Intents can be intercepted by any app that registers a matching intent filter, potentially capturing data that was meant for a specific, trusted component.`},
+    {id:`cv13`,q:`What is a PendingIntent?`,a:`A token that wraps an Intent and hands another app the right to execute it later using the original app's own identity and privileges.`},
+    {id:`cv14`,q:`What security issues can occur with PendingIntent?`,a:`If the wrapped Intent is mutable or under-specified, whoever holds the PendingIntent can modify it before execution and escalate privilege or hijack the action — which is why Android now pushes developers toward FLAG_IMMUTABLE.`},
+  ]},
+  authz: { name:`Authentication and authorization`, glyph:`⚿`, items:[
+    {id:`au1`,q:`How would you test authentication in a mobile app?`,a:`Intercept the login flow, check credentials are sent over TLS, examine how tokens are issued and stored, review session behavior, and test the MFA or biometric flow along with backend rate limiting on login attempts.`},
+    {id:`au2`,q:`How would you test authorization?`,a:`For every role or permission boundary, attempt the same action as a lower-privileged or entirely different user, checking both function-level access and object-level access on the underlying API.`},
+    {id:`au3`,q:`How would you test IDOR/BOLA in a mobile application?`,a:`As one authenticated user, change object identifiers such as a user ID or order ID in API requests and see whether you can reach another user's resources.`},
+    {id:`au4`,q:`Where does mobile authentication actually happen—the app or backend?`,a:`It has to be enforced on the backend. The app's UI is only presentation, and can never be trusted on its own to gate access.`},
+    {id:`au5`,q:`Can you trust a role value sent by the mobile app?`,a:`No. Anything the app sends — headers, client-set JWT claims, hidden fields — can be forged, so the backend must independently verify role and permission on every request.`},
+    {id:`au6`,q:`How would you test whether an API properly validates the user's role?`,a:`Hold a low-privileged session token and send requests carrying a modified or elevated role claim or identifier, and see whether the backend honors the forged value.`},
+    {id:`au7`,q:`What happens if you modify a JWT locally?`,a:`If signature verification isn't properly enforced server-side, or alg is set to none, or the signing key is weak or leaked, a tampered payload — like an elevated role — could be accepted, so this should always be tested directly.`},
+    {id:`au8`,q:`How would you test session management?`,a:`Check token expiry, whether logout actually invalidates the session server-side, how concurrent sessions are handled, whether a token still works after a password change, and how predictable session identifiers are.`},
+    {id:`au9`,q:`What happens if an access token doesn't expire?`,a:`It extends the attack window indefinitely if the token is ever leaked or stolen — tokens should have a short lifetime paired with refresh-token rotation.`},
+    {id:`au10`,q:`How would you test logout functionality?`,a:`Log out, then replay the previously issued token against the API and confirm it's actually rejected server-side rather than only cleared on the client.`},
+    {id:`au11`,q:`What is biometric authentication bypass?`,a:`Exploiting a weak implementation where the biometric prompt only gates a local boolean in the UI, rather than releasing a Keystore-protected cryptographic key that is actually tied to the backend session.`},
+    {id:`au12`,q:`Can client-side authentication controls be trusted?`,a:`Never. Client-side checks are a UX convenience at best; every authoritative security decision has to be revalidated server-side.`},
+  ]},
+  dynamic: { name:`Reverse engineering and dynamic analysis`, glyph:`◎`, items:[
+    {id:`dy1`,q:`What is dynamic analysis?`,a:`Observing and testing an app's actual runtime behavior — network calls, memory, executed functions — rather than only reading its code.`},
+    {id:`dy2`,q:`Static vs dynamic analysis?`,a:`Static analysis reads code and resources without running the app. Dynamic analysis observes or instruments the app while it's actually running, which catches behavior that obfuscation or runtime context would hide from a static read.`},
+    {id:`dy3`,q:`What is runtime instrumentation?`,a:`Injecting code into a running process to hook, observe, or modify its behavior on the fly.`},
+    {id:`dy4`,q:`What is Frida?`,a:`A dynamic instrumentation toolkit that injects a JavaScript-scriptable engine into a target process, letting you hook functions, read and modify memory, and intercept calls at runtime.`},
+    {id:`dy5`,q:`What is Objection?`,a:`A Frida-powered runtime exploration and CLI toolkit that wraps common mobile pentest tasks — pinning bypass, root detection bypass, memory dumps — without needing to write custom Frida scripts for each one.`},
+    {id:`dy6`,q:`What is Frida commonly used for in mobile security testing?`,a:`Bypassing SSL pinning, bypassing root detection, hooking crypto and auth functions to inspect values, tracing method calls, and patching return values live.`},
+    {id:`dy7`,q:`How would you investigate a suspicious function at runtime?`,a:`Hook it with Frida to log its arguments, return value, and call stack, and optionally override its return value to see how the app reacts.`},
+    {id:`dy8`,q:`How would you identify where an authentication token is generated?`,a:`Trace likely crypto, HTTP, or SharedPreferences write calls through the decompiled code for token-related method names, then confirm the exact source with a runtime Frida hook.`},
+    {id:`dy9`,q:`How would you observe sensitive API calls?`,a:`Proxy traffic through Burp while also hooking the app's networking or crypto layer with Frida, so you can see the plaintext before it's encrypted or before pinning would otherwise block the proxy.`},
+    {id:`dy10`,q:`How would you investigate certificate pinning?`,a:`Locate the TrustManager or OkHttp CertificatePinner implementation in the decompiled code, then hook or bypass it with Frida or Objection and confirm traffic now flows through Burp.`},
+    {id:`dy11`,q:`What is method hooking?`,a:`Intercepting calls to a specific method to inspect or alter its arguments, return value, or execution — the core technique behind most Frida work.`},
+  ]},
+  root: { name:`Root and device security`, glyph:`⚙`, items:[
+    {id:`rt1`,q:`What is root detection?`,a:`App-side checks that try to determine whether the device has been rooted, meaning it has elevated, unrestricted access.`},
+    {id:`rt2`,q:`Why do banking applications detect rooted devices?`,a:`Because root weakens the OS's normal security model — app sandboxing and isolation — making it easier to tamper with the app, extract its secrets, or run malware with elevated privileges alongside it.`},
+    {id:`rt3`,q:`How does an application detect root?`,a:`Checking for su binaries or Magisk artifacts, testing whether system partitions are writable, checking for known root-management packages, inspecting build tags, or relying on Play Integrity or SafetyNet-style attestation.`},
+    {id:`rt4`,q:`Is root detection a security vulnerability?`,a:`No, it's a security control rather than a vulnerability — though it's bypassable and shouldn't be relied on as the only protection for sensitive functionality.`},
+    {id:`rt5`,q:`How would you test root detection?`,a:`Run the app on a rooted device or emulator and see whether it blocks or warns, then attempt to bypass the check with Frida hooks or root-cloaking tools like Magisk Hide, and see whether the protected functionality becomes reachable.`},
+    {id:`rt6`,q:`Root detection vs certificate pinning?`,a:`Both are client-side hardening controls meant to raise the cost of tampering or interception, and both are bypassable through runtime instrumentation — neither should substitute for a server-side control.`},
+    {id:`rt7`,q:`What is Android Debug Bridge (ADB)?`,a:`A command-line tool for communicating with an Android device or emulator — installing apps, getting a shell, reading logcat, and transferring files.`},
+    {id:`rt8`,q:`What can ADB be useful for during an authorized assessment?`,a:`Installing and pulling APKs, pulling app data directories for review, tailing logcat, launching components directly, and port-forwarding to set up Frida or a Burp proxy.`},
+    {id:`rt9`,q:`What is an emulator vs physical device?`,a:`An emulator is a virtualized Android instance — fast to spin up and easy to root or instrument, but detectable. A physical device is real hardware, closer to production behavior, and needed when an app actively blocks emulation.`},
+    {id:`rt10`,q:`What limitations can an emulator have during testing?`,a:`Apps can detect and block emulation, hardware-backed features like StrongBox or certain sensors may not behave identically, and native ABI or performance differences can change app behavior.`},
+  ]},
+  deeplinks: { name:`Deep links`, glyph:`⇲`, items:[
+    {id:`dl1`,q:`What are Android deep links?`,a:`URIs, using either a custom scheme or an http/https link, that open a specific Activity or screen directly inside an app.`},
+    {id:`dl2`,q:`Deep links vs App Links?`,a:`Ordinary deep links can use any scheme and can be claimed by more than one app, prompting a chooser dialog. Android App Links use a verified https domain, tied to the app through digital asset links, so only the verified app opens it with no chooser.`},
+    {id:`dl3`,q:`What security vulnerabilities can occur through deep links?`,a:`Parameter injection into sensitive Activities, authentication or session bypass, Intent redirection, a WebView loading an attacker-controlled URL, and internal functionality exposed without the usual auth checks.`},
+    {id:`dl4`,q:`How would you test a deep link?`,a:`Enumerate the schemes and hosts declared in the manifest, trigger them with adb shell am start using the VIEW action and a crafted URI, fuzz the parameters, and observe how the app responds.`},
+    {id:`dl5`,q:`What happens if a deep link passes sensitive data through an Intent?`,a:`That data can leak through the clipboard, logs, or browser history, or be trusted by the app without validation, letting another app or a malicious webpage manipulate app state.`},
+    {id:`dl6`,q:`What is Intent redirection through deep links?`,a:`A deep link parameter gets used to build or forward another Intent internally, letting an attacker chain it to launch arbitrary internal components.`},
+    {id:`dl7`,q:`Can deep links lead to authentication or authorization bypass?`,a:`Yes — if a deep link opens a screen deep in the app's flow without re-checking that the user is authenticated and authorized for it, it can skip gates the normal navigation path would enforce.`},
+  ]},
+};
+
+const SCENARIOS = [
+  {id:`sc1`,orig:118,prompt:`You receive an APK. Walk me through your complete testing methodology.`,steps:[
+    `Recon: note the package name, min and target SDK, and get a feel for the app's purpose.`,
+    `Static analysis: decompile with JADX and apktool, review the manifest for exported components, allowBackup, and debuggable, grep for hardcoded secrets, and review crypto usage.`,
+    `Environment setup: configure Frida and Burp, install the proxy CA certificate, and prepare to handle pinning or root detection.`,
+    `Dynamic analysis: exercise the app's real flows while capturing traffic and hooking key functions.`,
+    `Component testing: probe exported activities, services, receivers, and providers directly with adb.`,
+    `Business logic: test authentication, session handling, and IDOR/BOLA against the backend APIs.`,
+    `Report: write up each finding with severity, reproduction steps, and remediation.`,
+  ]},
+  {id:`sc2`,orig:119,prompt:`You find an Activity with exported=true. How do you determine whether it's actually vulnerable?`,steps:[
+    `Check what the Activity does when launched externally, and whether it assumes some prior app state or authentication.`,
+    `Check whether it trusts Intent Extras for sensitive decisions, like a user ID or an admin flag.`,
+    `Launch it directly with adb shell am start and crafted extras, and observe whether it exposes data or skips a check it should enforce.`,
+  ]},
+  {id:`sc3`,orig:120,prompt:`An exported Activity accepts user_id through an Intent Extra and displays user information. What would you test?`,steps:[
+    `Launch the Activity directly via adb with different user_id values and see if other users' data comes back.`,
+    `Confirm the app never validates that the currently authenticated user actually owns that ID.`,
+    `Check whether the underlying backend call the Activity triggers is itself properly authorized, not just the local UI.`,
+  ]},
+  {id:`sc4`,orig:121,prompt:`The app stores an authentication token in SharedPreferences. What's the risk and remediation?`,steps:[
+    `Risk: the token sits in plaintext XML, extractable through root access, an ADB backup, or physical access, leading to account takeover.`,
+    `Remediation: store it behind Android Keystore-backed encryption such as EncryptedSharedPreferences.`,
+    `Remediation: disable allowBackup, and issue short-lived tokens with secure refresh rather than a long-lived static one.`,
+  ]},
+  {id:`sc5`,orig:122,prompt:`The application doesn't show HTTPS traffic in Burp. What could be causing it?`,steps:[
+    `The device or app isn't trusting Burp's CA certificate, especially since target SDK 24 and above ignores user-installed certificates by default.`,
+    `The app implements certificate pinning.`,
+    `The proxy isn't actually configured on the device or emulator, or traffic is on a different port or protocol than expected.`,
+    `A VPN app or similar is conflicting with the proxy setup.`,
+  ]},
+  {id:`sc6`,orig:123,prompt:`You discover certificate pinning. How would you proceed with an authorized assessment?`,steps:[
+    `Confirm the engagement scope allows bypassing client-side protections.`,
+    `Identify the pinning implementation — OkHttp's CertificatePinner, a custom TrustManager, or something native.`,
+    `Bypass it with a Frida script such as frida-multiple-unpinning, or Objection's pinning-disable command, patching or repackaging the APK if needed.`,
+    `Resume traffic analysis through Burp once pinning is bypassed.`,
+  ]},
+  {id:`sc7`,orig:124,prompt:`The app blocks rooted devices. How would you test the application?`,steps:[
+    `Try root-hiding tooling such as Magisk Hide or Zygisk-based cloaking modules.`,
+    `Hook the root-detection method directly with Frida and force its return value to appear clean.`,
+    `Fall back to a non-rooted device with Frida instrumentation, or a repackaged app, if root is blocked outright.`,
+  ]},
+  {id:`sc8`,orig:125,prompt:`The mobile app has no login bypass, but its API allows you to change another user's profile. What is the vulnerability?`,steps:[
+    `This is broken object-level authorization — IDOR or BOLA.`,
+    `The backend isn't validating that the authenticated user actually owns the object ID being modified.`,
+    `The mobile app's login flow being solid is irrelevant, since the flaw sits entirely in the API's authorization logic.`,
+  ]},
+  {id:`sc9`,orig:126,prompt:`You modify the role from user to admin in the mobile app. The UI shows admin functionality. Is that automatically a vulnerability?`,steps:[
+    `Not automatically — a locally forged role reflected only in the client UI is just a display bug on its own.`,
+    `The real test is whether protected server-side endpoints for admin actions accept and act on that forged role or token.`,
+    `If the backend independently re-validates role on every privileged call, the client-side change alone isn't exploitable.`,
+  ]},
+  {id:`sc10`,orig:127,prompt:`The app uses JWT authentication. What would you test?`,steps:[
+    `Whether signature verification is actually enforced server-side, including trying alg set to none or a stripped signature.`,
+    `Whether the signing key is weak or has leaked, by trying common secrets against an HMAC-signed token.`,
+    `Claim tampering, such as changing the role or user_id claim.`,
+    `Expiry enforcement, and whether a token is truly invalidated server-side on logout.`,
+    `Whether any sensitive data sits unencrypted inside the payload, since JWTs are typically only signed, not encrypted.`,
+  ]},
+  {id:`sc11`,orig:128,prompt:`You find an API key inside the APK. Is it automatically a vulnerability?`,steps:[
+    `Not automatically — it depends on what the key actually grants.`,
+    `A public, rate-limited client key scoped to the app's package and signing certificate, like a mapping SDK key, may be low risk.`,
+    `A key granting privileged backend or cloud access — an unscoped cloud provider key or an admin API token — is high severity.`,
+    `Assess the key's scope and abuse potential rather than flagging it by presence alone.`,
+  ]},
+  {id:`sc12`,orig:129,prompt:`You find an exported Content Provider. What would you investigate?`,steps:[
+    `Enumerate its URIs and authorities from the manifest and the decompiled code.`,
+    `Test read, insert, update, and delete access without holding any permission the app might expect.`,
+    `Check for SQL injection in the projection and selection parameters of its queries.`,
+    `Check for path traversal if the provider serves files.`,
+  ]},
+  {id:`sc13`,orig:130,prompt:`You find sensitive information in Logcat. What's the impact?`,steps:[
+    `Any app holding legacy log-read permission, or anyone with adb logcat access over USB debugging, can capture tokens, PII, or credentials in real time.`,
+    `That capture alone can enable session hijacking or data theft, without any further exploitation needed.`,
+  ]},
+];
+
+const PRIORITY = [
+  {text:`Complete APK pentest methodology, start to finish`, cat:null, goScenario:true},
+  {text:`Android Manifest and what exported=true really means`, cat:`fundamentals`},
+  {text:`Activities, Services, Receivers, and Content Providers`, cat:`fundamentals`},
+  {text:`Intents, Intent Extras, and IPC`, cat:`fundamentals`},
+  {text:`Static vs dynamic analysis, and when to reach for each`, cat:`dynamic`},
+  {text:`Certificate pinning and getting traffic into Burp`, cat:`network`},
+  {text:`Android Keystore and insecure storage patterns`, cat:`storage`},
+  {text:`Authentication vs authorization, and IDOR/BOLA`, cat:`authz`},
+  {text:`Frida and runtime instrumentation`, cat:`dynamic`},
+  {text:`Deep links and Intent redirection`, cat:`deeplinks`},
+];
+
+/* ============================= STATE ============================= */
+let progress = { known:{}, flagged:{}, steps:{}, priority:{} };
+let activeCat = `fundamentals`;
+let view = `study`; // study | browse
+let studyIndex = {};
+let flipped = false;
+let searchTerm = ``;
+let storageReady = false;
+
+const catKeys = Object.keys(DATA);
+
+function allItemsFlat(){
+  let out = [];
+  for(const k of catKeys){ for(const it of DATA[k].items){ out.push({...it, cat:k}); } }
+  return out;
+}
+const FLAT = allItemsFlat();
+const TOTAL_COUNT = FLAT.length + SCENARIOS.length;
+
+/* ============================= STORAGE ============================= */
+async function loadProgress(){
+  try{
+    const res = await window.storage.get(`android-fm-progress`, false);
+    if(res && res.value){ progress = Object.assign({known:{},flagged:{},steps:{},priority:{}}, JSON.parse(res.value)); }
+  }catch(e){ /* no saved progress yet */ }
+  storageReady = true;
+  renderAll();
+}
+let saveTimer = null;
+function saveProgress(){
+  if(!storageReady) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{ await window.storage.set(`android-fm-progress`, JSON.stringify(progress), false); }catch(e){}
+  }, 250);
+}
+
+/* ============================= HELPERS ============================= */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function knownCountTotal(){
+  return Object.values(progress.known).filter(Boolean).length;
+}
+function catKnownCount(cat){
+  return DATA[cat].items.filter(it => progress.known[it.id]).length;
+}
+
+/* ============================= RENDER: HEADER + NAV ============================= */
+function renderHeader(){
+  const known = knownCountTotal();
+  document.getElementById(`statKnown`).textContent = known;
+  document.getElementById(`statTotal`).textContent = TOTAL_COUNT;
+  const pct = TOTAL_COUNT ? Math.round((known/TOTAL_COUNT)*100) : 0;
+  document.getElementById(`statPct`).textContent = pct + `% covered`;
+  document.getElementById(`progressFill`).style.width = pct + `%`;
+}
+
+function renderNav(){
+  const tree = document.getElementById(`navTree`);
+  tree.innerHTML = ``;
+  for(const k of catKeys){
+    const cat = DATA[k];
+    const kc = catKnownCount(k);
+    const pct = cat.items.length ? Math.round((kc/cat.items.length)*100) : 0;
+    const li = document.createElement(`li`);
+    li.className = `nav-item-wrap`;
+    li.innerHTML = `
+      <button class="nav-item ${k===activeCat && view!=='scenarios' && view!=='priority-view' ? `active`:``}" data-cat="${k}">
+        <span class="glyph">${cat.glyph}</span>
+        <span class="name">${cat.name}</span>
+        <span class="count">${kc}/${cat.items.length}</span>
+      </button>
+      <div class="nav-mini-bar"><div class="nav-mini-fill" style="width:${pct}%"></div></div>
+    `;
+    tree.appendChild(li);
+  }
+  tree.querySelectorAll(`.nav-item`).forEach(btn=>{
+    btn.addEventListener(`click`, ()=>{
+      activeCat = btn.dataset.cat;
+      view = document.querySelector(`.mode-toggle button.active`).dataset.mode;
+      searchTerm = ``;
+      document.getElementById(`searchInput`).value = ``;
+      renderAll();
+    });
+  });
+
+  const extra = document.getElementById(`navExtra`);
+  const scKnown = SCENARIOS.filter(s=>s.steps.every((_,i)=>progress.steps[s.id+`-`+i])).length;
+  extra.innerHTML = `
+    <li class="nav-item-wrap">
+      <button class="nav-item ${activeCat===`__scenarios__`?`active`:``}" data-cat="__scenarios__">
+        <span class="glyph">✺</span><span class="name">Scenario drills</span><span class="count">${scKnown}/${SCENARIOS.length}</span>
+      </button>
+    </li>
+  `;
+  extra.querySelector(`.nav-item`).addEventListener(`click`, ()=>{
+    activeCat = `__scenarios__`;
+    searchTerm = ``;
+    document.getElementById(`searchInput`).value = ``;
+    renderAll();
+  });
+}
+
+/* ============================= RENDER: PRIORITY BAND ============================= */
+function renderPriority(){
+  const el = document.getElementById(`priorityBand`);
+  if(searchTerm){ el.innerHTML=``; return; }
+  const rows = PRIORITY.map((p,i)=>{
+    const key = `p`+i;
+    const on = !!progress.priority[key];
+    return `
+      <li>
+        <button class="priority-check ${on?`on`:``}" data-pk="${key}">${on?`✓`:``}</button>
+        <span class="priority-text">${p.text}</span>
+        <button class="priority-go" data-pcat="${p.goScenario?`__scenarios__`:p.cat}">Review →</button>
+      </li>`;
+  }).join(``);
+  el.innerHTML = `
+    <div class="priority-band">
+      <h2>The 10 to lock in first</h2>
+      <div class="sub">If you're short on time, drill these before anything else.</div>
+      <ul class="priority-list">${rows}</ul>
+    </div>
+  `;
+  el.querySelectorAll(`.priority-check`).forEach(b=>{
+    b.addEventListener(`click`, ()=>{
+      const k = b.dataset.pk;
+      progress.priority[k] = !progress.priority[k];
+      saveProgress();
+      renderPriority();
+    });
+  });
+  el.querySelectorAll(`.priority-go`).forEach(b=>{
+    b.addEventListener(`click`, ()=>{
+      activeCat = b.dataset.pcat;
+      view = `browse`;
+      document.querySelectorAll(`.mode-toggle button`).forEach(x=>x.classList.toggle(`active`, x.dataset.mode===`browse`));
+      renderAll();
+      document.getElementById(`viewRoot`).scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+    });
+  });
+}
+
+/* ============================= RENDER: MAIN VIEW ============================= */
+function renderMain(){
+  const root = document.getElementById(`viewRoot`);
+  document.getElementById(`shuffleBtn`).style.display = (view===`study` && activeCat!==`__scenarios__` && !searchTerm) ? `inline-flex` : `none`;
+
+  if(searchTerm){ renderSearch(root); return; }
+  if(activeCat === `__scenarios__`){ renderScenarios(root); return; }
+  if(view === `study`){ renderStudy(root); } else { renderBrowse(root); }
+}
+
+function renderSearch(root){
+  const term = searchTerm.toLowerCase();
+  const matches = FLAT.filter(it => it.q.toLowerCase().includes(term) || it.a.toLowerCase().includes(term));
+  const scMatches = SCENARIOS.filter(s => s.prompt.toLowerCase().includes(term) || s.steps.some(st=>st.toLowerCase().includes(term)));
+  if(matches.length===0 && scMatches.length===0){
+    root.innerHTML = `<div class="empty-search">Nothing matches “${escapeHtml(searchTerm)}”. Try a different term.</div>`;
+    return;
+  }
+  let html = `<div class="section-head"><h2>Search results</h2><span class="sub">${matches.length+scMatches.length} match${(matches.length+scMatches.length)===1?``:`es`}</span></div>`;
+  matches.forEach(it=>{
+    const on = !!progress.known[it.id];
+    html += `
+      <div class="qa-item open">
+        <div class="qa-head" data-id="${it.id}">
+          <span class="qa-check ${on?`on`:``}" data-check="${it.id}">${on?`✓`:``}</span>
+          <span class="qa-q">${escapeHtml(it.q)}</span>
+          <span class="qa-cat">${DATA[it.cat].name}</span>
+        </div>
+        <div class="qa-body" style="display:block;">${escapeHtml(it.a)}</div>
+      </div>`;
+  });
+  scMatches.forEach(s=>{
+    html += `
+      <div class="scenario open">
+        <div class="scenario-head"><span class="scenario-badge">scenario</span><span class="scenario-prompt">${escapeHtml(s.prompt)}</span></div>
+        <div class="scenario-body" style="display:block;">${s.steps.map(st=>`<div class="step-row"><span class="step-text">${escapeHtml(st)}</span></div>`).join(``)}</div>
+      </div>`;
+  });
+  root.innerHTML = html;
+  root.querySelectorAll(`.qa-check`).forEach(c=>{
+    c.addEventListener(`click`, (e)=>{ e.stopPropagation(); toggleKnown(c.dataset.check); });
+  });
+}
+
+function renderStudy(root){
+  const cat = DATA[activeCat];
+  if(!studyIndex[activeCat]) studyIndex[activeCat] = { order: cat.items.map(it=>it.id), pos: 0 };
+  const st = studyIndex[activeCat];
+  if(st.pos >= st.order.length) st.pos = 0;
+  const currentId = st.order[st.pos];
+  const item = cat.items.find(it=>it.id===currentId);
+  const kc = catKnownCount(activeCat);
+
+  root.innerHTML = `
+    <div class="section-head">
+      <h2>${cat.name}</h2>
+      <span class="sub">${kc}/${cat.items.length} reviewed</span>
+    </div>
+    <div class="card-stage">
+      <div class="flashcard ${flipped?`flipped`:``}" id="flashcard">
+        <div class="face front">
+          <div class="card-tag">${cat.name}</div>
+          <div class="card-q">${escapeHtml(item.q)}</div>
+          <div class="card-hint">tap to reveal</div>
+        </div>
+        <div class="face back">
+          <div class="card-a-label">answer</div>
+          <div class="card-a">${escapeHtml(item.a)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-controls">
+      <button class="ctrl-btn" id="prevBtn">‹ prev</button>
+      <button class="ctrl-btn" id="flipBtn">⟲ flip</button>
+      <button class="ctrl-btn ${progress.known[item.id]?`known`:``}" id="knownBtn">${progress.known[item.id]?`✓ reviewed`:`mark reviewed`}</button>
+      <button class="ctrl-btn flag" id="flagBtn">${progress.flagged[item.id]?`★ flagged`:`☆ flag`}</button>
+      <span class="ctrl-spacer"></span>
+      <span class="pos-indicator">${st.pos+1} / ${st.order.length}</span>
+      <button class="ctrl-btn" id="nextBtn">next ›</button>
+    </div>
+  `;
+
+  document.getElementById(`flashcard`).addEventListener(`click`, ()=>{ flipped = !flipped; renderMain(); });
+  document.getElementById(`flipBtn`).addEventListener(`click`, (e)=>{ e.stopPropagation(); flipped=!flipped; renderMain(); });
+  document.getElementById(`prevBtn`).addEventListener(`click`, (e)=>{ e.stopPropagation(); st.pos = (st.pos-1+st.order.length)%st.order.length; flipped=false; renderMain(); });
+  document.getElementById(`nextBtn`).addEventListener(`click`, (e)=>{ e.stopPropagation(); st.pos = (st.pos+1)%st.order.length; flipped=false; renderMain(); });
+  document.getElementById(`knownBtn`).addEventListener(`click`, (e)=>{ e.stopPropagation(); toggleKnown(item.id); });
+  document.getElementById(`flagBtn`).addEventListener(`click`, (e)=>{ e.stopPropagation(); progress.flagged[item.id] = !progress.flagged[item.id]; saveProgress(); renderMain(); renderNav(); });
+}
+
+function renderBrowse(root){
+  const cat = DATA[activeCat];
+  const kc = catKnownCount(activeCat);
+  let html = `
+    <div class="section-head">
+      <h2>${cat.name}</h2>
+      <span class="sub">${kc}/${cat.items.length} reviewed</span>
+    </div>`;
+  cat.items.forEach(it=>{
+    const on = !!progress.known[it.id];
+    html += `
+      <div class="qa-item" data-item="${it.id}">
+        <div class="qa-head" data-id="${it.id}">
+          <span class="qa-check ${on?`on`:``}" data-check="${it.id}">${on?`✓`:``}</span>
+          <span class="qa-q">${escapeHtml(it.q)}</span>
+          <span class="qa-arrow">›</span>
+        </div>
+        <div class="qa-body">${escapeHtml(it.a)}</div>
+      </div>`;
+  });
+  root.innerHTML = html;
+  root.querySelectorAll(`.qa-head`).forEach(h=>{
+    h.addEventListener(`click`, (e)=>{
+      if(e.target.classList.contains(`qa-check`)) return;
+      h.closest(`.qa-item`).classList.toggle(`open`);
+    });
+  });
+  root.querySelectorAll(`.qa-check`).forEach(c=>{
+    c.addEventListener(`click`, (e)=>{ e.stopPropagation(); toggleKnown(c.dataset.check); });
+  });
+}
+
+function renderScenarios(root){
+  let html = `
+    <div class="section-head">
+      <h2>Scenario drills</h2>
+      <span class="sub">practice these out loud</span>
+    </div>`;
+  SCENARIOS.forEach((s,idx)=>{
+    const doneSteps = s.steps.filter((_,i)=>progress.steps[s.id+`-`+i]).length;
+    html += `
+      <div class="scenario" data-sid="${s.id}">
+        <div class="scenario-head" data-shead="${s.id}">
+          <span class="scenario-badge">${idx+1} of ${SCENARIOS.length}</span>
+          <span class="scenario-prompt">${escapeHtml(s.prompt)}</span>
+          <span class="qa-arrow">›</span>
+        </div>
+        <div class="scenario-body">
+          ${s.steps.map((st,i)=>{
+            const on = !!progress.steps[s.id+`-`+i];
+            return `<div class="step-row ${on?`on`:``}">
+              <span class="step-check ${on?`on`:``}" data-step="${s.id}-${i}">${on?`✓`:``}</span>
+              <span class="step-text">${escapeHtml(st)}</span>
+            </div>`;
+          }).join(``)}
+        </div>
+      </div>`;
+  });
+  root.innerHTML = html;
+  root.querySelectorAll(`[data-shead]`).forEach(h=>{
+    h.addEventListener(`click`, ()=>{ h.closest(`.scenario`).classList.toggle(`open`); });
+  });
+  root.querySelectorAll(`.step-check`).forEach(c=>{
+    c.addEventListener(`click`, (e)=>{
+      e.stopPropagation();
+      const k = c.dataset.step;
+      progress.steps[k] = !progress.steps[k];
+      saveProgress();
+      renderScenarios(root);
+      renderNav();
+    });
+  });
+}
+
+function toggleKnown(id){
+  progress.known[id] = !progress.known[id];
+  saveProgress();
+  renderHeader();
+  renderNav();
+  renderMain();
+}
+
+function escapeHtml(str){
+  return str.replace(/&/g,`&amp;`).replace(/</g,`&lt;`).replace(/>/g,`&gt;`);
+}
+
+/* ============================= EVENTS ============================= */
+document.getElementById(`modeToggle`).addEventListener(`click`, (e)=>{
+  const btn = e.target.closest(`button[data-mode]`);
+  if(!btn) return;
+  document.querySelectorAll(`.mode-toggle button`).forEach(b=>b.classList.toggle(`active`, b===btn));
+  view = btn.dataset.mode;
+  if(activeCat===`__scenarios__`) activeCat = catKeys[0];
+  renderAll();
+});
+
+document.getElementById(`searchInput`).addEventListener(`input`, (e)=>{
+  searchTerm = e.target.value.trim();
+  renderMain();
+  renderPriority();
+});
+
+document.getElementById(`shuffleBtn`).addEventListener(`click`, ()=>{
+  if(activeCat===`__scenarios__`) return;
+  studyIndex[activeCat] = { order: shuffle(DATA[activeCat].items.map(it=>it.id)), pos:0 };
+  flipped = false;
+  renderMain();
+});
+
+document.addEventListener(`keydown`, (e)=>{
+  if(document.activeElement === document.getElementById(`searchInput`)) return;
+  if(view!==`study` || activeCat===`__scenarios__` || searchTerm) return;
+  if(e.key===`ArrowRight`){ document.getElementById(`nextBtn`)?.click(); }
+  else if(e.key===`ArrowLeft`){ document.getElementById(`prevBtn`)?.click(); }
+  else if(e.key===` `){ e.preventDefault(); document.getElementById(`flipBtn`)?.click(); }
+  else if(e.key.toLowerCase()===`k`){ document.getElementById(`knownBtn`)?.click(); }
+});
+
+function renderAll(){
+  renderHeader();
+  renderNav();
+  renderPriority();
+  renderMain();
+}
+
+loadProgress();
+</script>
+</body>
+</html>
