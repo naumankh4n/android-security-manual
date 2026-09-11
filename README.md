@@ -1,5 +1,7 @@
 # Android Security Field Manual
 
+https://naumankh4n.github.io/android-security-manual/
+
 An interactive, single-file study tool for Android app pentesting interviews — manifest analysis, storage, network, component vulnerabilities, auth, Frida/dynamic analysis, root detection, and deep links, plus 13 scenario-based practice drills.
 
 No build step, no dependencies to install, no backend. It's one HTML file.
