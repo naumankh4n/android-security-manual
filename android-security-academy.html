@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔴 Android Security Academy</title>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #131320;
+            --surface2: #1a1a2e;
+            --surface3: #222240;
+            --accent: #e53935;
+            --accent2: #ff5252;
+            --accent-glow: rgba(229, 57, 53, 0.3);
+            --gold: #ffb300;
+            --green: #4caf50;
+            --blue: #42a5f5;
+            --purple: #ab47bc;
+            --cyan: #26c6da;
+            --text: #e0e0e0;
+            --text2: #b0b0b0;
+            --text3: #808090;
+            --border: #2a2a3e;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --transition: 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image: radial-gradient(circle at 20% 50%, rgba(229, 57, 53, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(66, 165, 245, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(171, 71, 188, 0.03) 0%, transparent 50%);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0;
+        }
+        .navbar-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            height: 56px;
+            gap: 8px;
+        }
+        .navbar .logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #ff8a65);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+            margin-right: 8px;
+        }
+        .navbar .logo-icon {
+            font-size: 1.5rem;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 2px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            flex: 1;
+        }
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .nav-tab {
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            color: var(--text3);
+            background: transparent;
+            border: none;
+            transition: var(--transition);
+            position: relative;
+        }
+        .nav-tab:hover {
+            color: var(--text);
+            background: var(--surface3);
+        }
+        .nav-tab.active {
+            color: #fff;
+            background: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .nav-search {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: var(--text);
+            font-size: 0.85rem;
+            width: 200px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .nav-search:focus {
+            border-color: var(--accent);
+            width: 250px;
+        }
+
+        /* MAIN LAYOUT */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+            animation: fadeSlide 0.3s ease;
+        }
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* HERO */
+        .hero {
+            text-align: center;
+            padding: 48px 24px;
+            position: relative;
+        }
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #e53935, #ff6e40, #ffab40);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--text2);
+            max-width: 700px;
+            margin: 0 auto 24px;
+        }
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+        .hero-stat {
+            text-align: center;
+            padding: 16px 24px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        .hero-stat .num {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        .hero-stat .label {
+            font-size: 0.8rem;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+        .card:hover {
+            border-color: #444;
+            box-shadow: var(--shadow);
+        }
+        .card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card p {
+            color: var(--text2);
+            font-size: 0.9rem;
+        }
+
+        /* MIND MAP */
+        .mindmap-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            min-height: 500px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 20px;
+        }
+        .mindmap-container svg {
+            width: 100%;
+            height: auto;
+        }
+
+        /* CODE BLOCK */
+        .code-block {
+            background: #0d0d1a;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            position: relative;
+            margin: 12px 0;
+            color: #c9d1d9;
+        }
+        .code-block .keyword {
+            color: #ff7b72;
+        }
+        .code-block .string {
+            color: #a5d6ff;
+        }
+        .code-block .comment {
+            color: #6e7681;
+        }
+        .code-block .tag {
+            color: #7ee787;
+        }
+        .code-block .attr {
+            color: #79c0ff;
+        }
+        .code-block .value {
+            color: #a5d6ff;
+        }
+        .code-label {
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: var(--accent);
+            color: #fff;
+            padding: 2px 12px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            color: var(--text3);
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: var(--transition);
+        }
+        .copy-btn:hover {
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 8px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text3);
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .tab-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* GRID */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 16px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        /* FLASHCARD */
+        .flashcard {
+            perspective: 1000px;
+            height: 200px;
+            cursor: pointer;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front,
+        .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .flashcard-front {
+            background: var(--surface);
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+        .flashcard-back {
+            background: var(--surface2);
+            transform: rotateY(180deg);
+            font-size: 0.9rem;
+            color: var(--text2);
+        }
+        .flashcard .hint {
+            position: absolute;
+            bottom: 8px;
+            font-size: 0.7rem;
+            color: var(--text3);
+        }
+
+        /* QUIZ */
+        .quiz-container {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 24px;
+        }
+        .quiz-question {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            margin: 6px 0;
+            background: var(--surface2);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .quiz-option:hover {
+            border-color: var(--accent);
+            background: var(--surface3);
+        }
+        .quiz-option.correct {
+            border-color: var(--green);
+            background: rgba(76, 175, 80, 0.15);
+        }
+        .quiz-option.wrong {
+            border-color: var(--accent);
+            background: rgba(229, 57, 53, 0.15);
+        }
+        .quiz-option:disabled {
+            pointer-events: none;
+        }
+        .quiz-feedback {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+        }
+        .quiz-feedback.correct-fb {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--green);
+        }
+        .quiz-feedback.wrong-fb {
+            background: rgba(229, 57, 53, 0.1);
+            color: var(--accent2);
+        }
+
+        /* FLOWCHART */
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 20px;
+        }
+        .flow-node {
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-align: center;
+            min-width: 160px;
+        }
+        .flow-arrow {
+            color: var(--text3);
+            font-size: 1.5rem;
+        }
+        .flow-branch {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+        .flow-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* BADGE */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-red {
+            background: rgba(229, 57, 53, 0.2);
+            color: var(--accent2);
+        }
+        .badge-green {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--green);
+        }
+        .badge-blue {
+            background: rgba(66, 165, 245, 0.2);
+            color: var(--blue);
+        }
+        .badge-gold {
+            background: rgba(255, 179, 0, 0.2);
+            color: var(--gold);
+        }
+        .badge-purple {
+            background: rgba(171, 71, 188, 0.2);
+            color: var(--purple);
+        }
+
+        /* PROGRESS */
+        .progress-bar {
+            height: 6px;
+            background: var(--surface3);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--gold));
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th,
+        td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--surface2);
+            color: var(--accent);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* SCENARIO */
+        .scenario-card {
+            border-left: 4px solid var(--accent);
+            background: var(--surface);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 16px 20px;
+            margin: 12px 0;
+        }
+        .scenario-card .q {
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--accent2);
+        }
+        .scenario-card .steps {
+            list-style: none;
+            padding: 0;
+        }
+        .scenario-card .steps li {
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+            color: var(--text2);
+            font-size: 0.9rem;
+        }
+        .scenario-card .steps li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* TERMINAL */
+        .terminal {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: #0f0;
+            margin: 12px 0;
+            position: relative;
+        }
+        .terminal .prompt {
+            color: #0f0;
+        }
+        .terminal .output {
+            color: #aaa;
+        }
+        .terminal .cmd {
+            color: #ff0;
+        }
+
+        /* TAG */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin: 2px;
+        }
+        .tag-vuln {
+            background: rgba(229, 57, 53, 0.2);
+            color: #ff8a80;
+        }
+        .tag-sec {
+            background: rgba(76, 175, 80, 0.2);
+            color: #69f0ae;
+        }
+        .tag-info {
+            background: rgba(66, 165, 245, 0.2);
+            color: #82b1ff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            .nav-search {
+                width: 120px;
+            }
+            .nav-search:focus {
+                width: 150px;
+            }
+            .nav-tab {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* TOOLTIP */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted var(--text3);
+        }
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            color: #e0e0e0;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 10;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <span class="logo">🔴 AndroidSec Academy</span>
+            <div class="nav-tabs" id="navTabs">
+                <button class="nav-tab active" data-section="home">🏠 Home</button>
+                <button class="nav-tab" data-section="fundamentals">📚 Fundamentals</button>
+                <button class="nav-tab" data-section="static">🔍 Static Analysis</button>
+                <button class="nav-tab" data-section="components">🧩 Components</button>
+                <button class="nav-tab" data-section="network">🌐 Network</button>
+                <button class="nav-tab" data-section="storage">💾 Storage</button>
+                <button class="nav-tab" data-section="auth">🔐 Auth & Authz</button>
+                <button class="nav-tab" data-section="reverse">🔧 Reverse Eng</button>
+                <button class="nav-tab" data-section="deeplinks">🔗 Deep Links</button>
+                <button class="nav-tab" data-section="scenarios">🔥 Scenarios</button>
+                <button class="nav-tab" data-section="quiz">🎯 Quiz</button>
+            </div>
+            <input type="text" class="nav-search" placeholder="🔍 Search topics..." id="searchInput">
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-container">
+
+        <!-- ============ HOME ============ -->
+        <section class="section active" id="section-home">
+            <div class="hero">
+                <h1>Android Security Pentesting</h1>
+                <p class="subtitle">Master Android application security testing with interactive mind maps, command references, visual diagrams, and hands-on scenarios. From fundamentals to advanced exploitation.</p>
+                <div class="hero-stats">
+                    <div class="hero-stat"><div class="num">130+</div><div class="label">Interview Q&A</div></div>
+                    <div class="hero-stat"><div class="num">10</div><div class="label">Scenario Walkthroughs</div></div>
+                    <div class="hero-stat"><div class="num">6</div><div class="label">Knowledge Domains</div></div>
+                    <div class="hero-stat"><div class="num">15+</div><div class="label">Interactive Quizzes</div></div>
+                </div>
+            </div>
+
+            <div class="grid-3">
+                <div class="card" style="cursor:pointer" onclick="switchSection('fundamentals')">
+                    <h3>📚 Fundamentals</h3>
+                    <p>Android architecture, APK structure, Manifest, 4 components, Intents, IPC, permissions</p>
+                    <span class="badge badge-blue">Beginner</span>
+                </div>
+                <div class="card" style="cursor:pointer" onclick="switchSection('static')">
+                    <h3>🔍 Static Analysis</h3>
+                    <p>JADX, apktool, MobSF, smali, decompilation, hardcoded secrets, API keys</p>
+                    <span class="badge badge-gold">Core Skill</span>
+                </div>
+                <div class="card" style="cursor:pointer" onclick="switchSection('components')">
+                    <h3>🧩 Component Vulns</h3>
+                    <p>Exported Activities, Broadcast spoofing, Content Provider leaks, Intent redirection</p>
+                    <span class="badge badge-red">Critical</span>
+                </div>
+                <div class="card" style="cursor:pointer" onclick="switchSection('network')">
+                    <h3>🌐 Network Security</h3>
+                    <p>Burp Suite, certificate pinning, TLS, cleartext traffic, Network Security Config</p>
+                    <span class="badge badge-gold">Core Skill</span>
+                </div>
+                <div class="card" style="cursor:pointer" onclick="switchSection('storage')">
+                    <h3>💾 Data Storage</h3>
+                    <p>SharedPreferences, SQLite, Keystore, insecure storage, Logcat leaks, backups</p>
+                    <span class="badge badge-red">Critical</span>
+                </div>
+                <div class="card" style="cursor:pointer" onclick="switchSection('auth')">
+                    <h3>🔐 Auth & Authorization</h3>
+                    <p>JWT, IDOR/BOLA, session management, biometric bypass, role manipulation</p>
+                    <span class="badge badge-purple">Advanced</span>
+                </div>
+            </div>
+
+            <h3 style="margin-top:24px">🧠 Android Security Mind Map</h3>
+            <div class="mindmap-container" id="mindmapHome"></div>
+
+            <h3 style="margin-top:16px">📊 Key Stats</h3>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>OWASP Mobile Top 10</h3>
+                    <table>
+                        <tr><th>#</th><th>Risk</th><th>Severity</th></tr>
+                        <tr><td>M1</td><td>Improper Platform Usage</td><td><span class="badge badge-red">High</span></td></tr>
+                        <tr><td>M2</td><td>Insecure Data Storage</td><td><span class="badge badge-red">High</span></td></tr>
+                        <tr><td>M3</td><td>Insecure Communication</td><td><span class="badge badge-red">High</span></td></tr>
+                        <tr><td>M4</td><td>Insecure Authentication</td><td><span class="badge badge-red">High</span></td></tr>
+                        <tr><td>M5</td><td>Insufficient Cryptography</td><td><span class="badge badge-gold">Medium</span></td></tr>
+                        <tr><td>M6</td><td>Insecure Authorization</td><td><span class="badge badge-red">High</span></td></tr>
+                        <tr><td>M7</td><td>Client Code Quality</td><td><span class="badge badge-blue">Low</span></td></tr>
+                        <tr><td>M8</td><td>Code Tampering</td><td><span class="badge badge-gold">Medium</span></td></tr>
+                        <tr><td>M9</td><td>Reverse Engineering</td><td><span class="badge badge-gold">Medium</span></td></tr>
+                        <tr><td>M10</td><td>Extraneous Functionality</td><td><span class="badge badge-blue">Low</span></td></tr>
+                    </table>
+                </div>
+                <div class="card">
+                    <h3>Toolkit Reference</h3>
+                    <table>
+                        <tr><th>Tool</th><th>Purpose</th></tr>
+                        <tr><td>JADX</td><td>DEX → Java decompiler</td></tr>
+                        <tr><td>apktool</td><td>APK unpack/repack, smali</td></tr>
+                        <tr><td>MobSF</td><td>Automated static analysis</td></tr>
+                        <tr><td>Frida</td><td>Dynamic instrumentation</td></tr>
+                        <tr><td>Objection</td><td>Runtime exploration</td></tr>
+                        <tr><td>Burp Suite</td><td>HTTP proxy / MitM</td></tr>
+                        <tr><td>ADB</td><td>Android Debug Bridge</td></tr>
+                        <tr><td>Drozer</td><td>Component exploitation</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ FUNDAMENTALS ============ -->
+        <section class="section" id="section-fundamentals">
+            <h2>📚 Android Fundamentals</h2>
+            <p style="color:var(--text2);margin-bottom:16px">Core concepts every Android security tester must understand.</p>
+
+            <div class="tabs" id="fundamentalsTabs">
+                <button class="tab-btn active" data-tab="arch">Architecture & APK</button>
+                <button class="tab-btn" data-tab="components-f">4 Components</button>
+                <button class="tab-btn" data-tab="intents">Intents & IPC</button>
+                <button class="tab-btn" data-tab="permissions">Permissions</button>
+            </div>
+
+            <!-- Architecture Tab -->
+            <div class="tab-content active" id="tab-arch">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📐 Android Architecture Layers</h3>
+                        <div class="mindmap-container" id="mmArchitecture" style="min-height:350px"></div>
+                    </div>
+                    <div class="card">
+                        <h3>📦 What is an APK?</h3>
+                        <p>APK = <strong>Android Package Kit</strong>. It's a ZIP archive containing the compiled app, resources, and manifest. Think of it as Android's equivalent of <code>.exe</code> or <code>.app</code>.</p>
+                        <div class="code-block" style="position:relative;margin-top:12px">
+                            <span class="code-label">APK Contents</span>
+                            <pre>📦 app.apk
+├── 📄 AndroidManifest.xml     <span class="comment">← Binary XML (app config)</span>
+├── 📁 META-INF/               <span class="comment">← Signatures & certificates</span>
+│   ├── CERT.RSA
+│   ├── CERT.SF
+│   └── MANIFEST.MF
+├── 📁 classes.dex             <span class="comment">← Dalvik bytecode (compiled Java/Kotlin)</span>
+├── 📁 classes2.dex            <span class="comment">← Multi-dex (if app is large)</span>
+├── 📁 res/                    <span class="comment">← Resources (layouts, drawables, strings)</span>
+├── 📁 assets/                 <span class="comment">← Raw asset files (fonts, HTML, configs)</span>
+├── 📁 lib/                    <span class="comment">← Native libraries (.so files)</span>
+│   ├── arm64-v8a/
+│   ├── armeabi-v7a/
+│   └── x86_64/
+└── 📄 resources.arsc          <span class="comment">← Compiled resources table</span></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:12px">
+                    <h3>📋 AndroidManifest.xml — The Blueprint</h3>
+                    <p>The Manifest declares everything about the app: components, permissions, hardware features, and more.</p>
+                    <div class="code-block" style="position:relative">
+                        <span class="code-label">AndroidManifest.xml</span>
+                        <pre>&lt;<span class="tag">manifest</span> <span class="attr">package</span>=<span class="value">"com.example.app"</span>&gt;
+
+    <span class="comment">&lt;!-- Permissions the app requests --&gt;</span>
+    &lt;<span class="tag">uses-permission</span> <span class="attr">android:name</span>=<span class="value">"android.permission.INTERNET"</span>/&gt;
+    &lt;<span class="tag">uses-permission</span> <span class="attr">android:name</span>=<span class="value">"android.permission.CAMERA"</span>/&gt;
+
+    <span class="comment">&lt;!-- App configuration --&gt;</span>
+    &lt;<span class="tag">application</span>
+        <span class="attr">android:allowBackup</span>=<span class="value">"true"</span>           <span class="comment">&lt;-- ⚠️ Security: allows ADB backup</span>
+        <span class="attr">android:usesCleartextTraffic</span>=<span class="value">"true"</span> <span class="comment">&lt;-- ⚠️ Security: allows HTTP</span>
+        <span class="attr">android:debuggable</span>=<span class="value">"false"</span>&gt;          <span class="comment">&lt;-- Should be false in release!</span>
+
+        <span class="comment">&lt;!-- ⚠️ exported=true means other apps can launch this --&gt;</span>
+        &lt;<span class="tag">activity</span> <span class="attr">android:name</span>=<span class="value">".MainActivity"</span>
+            <span class="attr">android:exported</span>=<span class="value">"true"</span>&gt;
+            &lt;<span class="tag">intent-filter</span>&gt;
+                &lt;<span class="tag">action</span> <span class="attr">android:name</span>=<span class="value">"android.intent.action.MAIN"</span>/&gt;
+                &lt;<span class="tag">category</span> <span class="attr">android:name</span>=<span class="value">"android.intent.category.LAUNCHER"</span>/&gt;
+            &lt;/<span class="tag">intent-filter</span>&gt;
+        &lt;/<span class="tag">activity</span>&gt;
+
+        &lt;<span class="tag">service</span> <span class="attr">android:name</span>=<span class="value">".MyService"</span>
+            <span class="attr">android:exported</span>=<span class="value">"true"</span>/&gt; <span class="comment">&lt;-- ⚠️ Check this!</span>
+
+        &lt;<span class="tag">receiver</span> <span class="attr">android:name</span>=<span class="value">".MyReceiver"</span>
+            <span class="attr">android:exported</span>=<span class="value">"true"</span>/&gt; <span class="comment">&lt;-- ⚠️ Check this!</span>
+
+        &lt;<span class="tag">provider</span> <span class="attr">android:name</span>=<span class="value">".MyProvider"</span>
+            <span class="attr">android:exported</span>=<span class="value">"true"</span>
+            <span class="attr">android:authorities</span>=<span class="value">"com.example.provider"</span>/&gt; <span class="comment">&lt;-- ⚠️ Check this!</span>
+
+    &lt;/<span class="tag">application</span>&gt;
+&lt;/<span class="tag">manifest</span>&gt;</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4 Components Tab -->
+            <div class="tab-content" id="tab-components-f">
+                <h3>🧩 The Four Android Components</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>1️⃣ Activity <span class="badge badge-blue">UI Screen</span></h3>
+                        <p>A single screen with a user interface. Every screen the user sees is an Activity (or Fragment within one).</p>
+                        <p style="margin-top:8px"><strong>Lifecycle:</strong> onCreate → onStart → onResume → onPause → onStop → onDestroy</p>
+                        <p><strong>Security concern:</strong> Exported Activities can be launched by other apps → bypass authentication, steal data</p>
+                        <div class="terminal">
+                            <span class="prompt">$ </span><span class="cmd">adb shell am start -n com.example/.SecretActivity</span>
+                            <br><span class="output">Starting: Intent { cmp=com.example/.SecretActivity }</span>
+                            <br><span class="output">⚠️ Launches activity from outside the app!</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>2️⃣ Service <span class="badge badge-purple">Background</span></h3>
+                        <p>Runs in background, no UI. Used for long-running operations (music, downloads, sync).</p>
+                        <p><strong>Types:</strong> Started Service, Bound Service, Foreground Service</p>
+                        <p><strong>Security concern:</strong> Exported Services can be started/bound by other apps → data theft, code execution</p>
+                    </div>
+                    <div class="card">
+                        <h3>3️⃣ Broadcast Receiver <span class="badge badge-gold">Event Listener</span></h3>
+                        <p>Listens for system-wide broadcast announcements (boot complete, battery low, SMS received).</p>
+                        <p><strong>Security concern:</strong> Exported Receivers can receive spoofed broadcasts → trigger unintended actions</p>
+                        <div class="terminal">
+                            <span class="prompt">$ </span><span class="cmd">adb shell am broadcast -a com.example.CUSTOM_ACTION --es key "malicious"</span>
+                            <br><span class="output">Broadcasting: Intent { act=com.example.CUSTOM_ACTION (has extras) }</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>4️⃣ Content Provider <span class="badge badge-red">Data Access</span></h3>
+                        <p>Manages shared app data (SQLite, files). Provides CRUD interface via content:// URIs.</p>
+                        <p><strong>Security concern:</strong> Exported Providers can leak data, allow SQL injection, path traversal</p>
+                        <div class="terminal">
+                            <span class="prompt">$ </span><span class="cmd">adb shell content query --uri content://com.example.provider/users</span>
+                            <br><span class="output">Row: 0 _id=1, name=admin, password=supersecret123</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:12px">
+                    <h3>🔄 Component Communication Flow</h3>
+                    <div class="mindmap-container" id="mmComponentFlow" style="min-height:280px"></div>
+                </div>
+            </div>
+
+            <!-- Intents Tab -->
+            <div class="tab-content" id="tab-intents">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>🎯 What is an Intent?</h3>
+                        <p>An <strong>Intent</strong> is a messaging object used to request an action from another app component. It's the fundamental IPC mechanism on Android.</p>
+                        <table>
+                            <tr><th>Intent Type</th><th>Description</th><th>Security Risk</th></tr>
+                            <tr><td><strong>Explicit</strong></td><td>Targets a specific component by class name</td><td><span class="badge badge-green">Low</span> — Intent is delivered to known recipient</td></tr>
+                            <tr><td><strong>Implicit</strong></td><td>Declares an action, system resolves which component handles it</td><td><span class="badge badge-red">High</span> — Intent hijacking, eavesdropping</td></tr>
+                            <tr><td><strong>PendingIntent</strong></td><td>Token given to foreign app; it executes with original app's permissions</td><td><span class="badge badge-red">Critical</span> — Privilege escalation if mutable</td></tr>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <h3>📨 Intent Extras (Data Payload)</h3>
+                        <p>Key-value pairs attached to Intents. Apps use these to pass data between components.</p>
+                        <div class="code-block" style="position:relative">
+                            <span class="code-label">Intent with Extras</span>
+                            <pre><span class="comment">// Creating an Intent with extras</span>
+Intent intent = <span class="keyword">new</span> Intent(<span class="keyword">this</span>, ProfileActivity.<span class="keyword">class</span>);
+intent.putExtra(<span class="string">"user_id"</span>, <span class="string">"12345"</span>);       <span class="comment">// ⚠️ Trusted?</span>
+intent.putExtra(<span class="string">"is_admin"</span>, <span class="keyword">true</span>);        <span class="comment">// ⚠️ Can be forged!</span>
+intent.putExtra(<span class="string">"auth_token"</span>, <span class="string">"eyJhbG..."</span>);  <span class="comment">// ⚠️ Sensitive in transit!</span>
+startActivity(intent);</pre>
+                        </div>
+                        <p style="margin-top:8px"><span class="badge badge-red">⚠️ Risk</span> Intent extras can be read by any receiver if sent via implicit intent. Never trust extras from external sources!</p>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:12px">
+                    <h3>🔀 IPC (Inter-Process Communication) on Android</h3>
+                    <p>Android apps run in separate processes (sandboxed by UID). IPC mechanisms:</p>
+                    <table>
+                        <tr><th>Mechanism</th><th>How It Works</th><th>Used By</th></tr>
+                        <tr><td><strong>Intents</strong></td><td>Asynchronous messages via Binder</td><td>Activities, Services, Receivers</td></tr>
+                        <tr><td><strong>Binder (AIDL)</strong></td><td>RPC-style interface definition</td><td>Bound Services</td></tr>
+                        <tr><td><strong>ContentProvider</strong></td><td>URI-based data access</td><td>Data sharing between apps</td></tr>
+                        <tr><td><strong>Messenger</strong></td><td>Message queue on top of Binder</td><td>Simple service communication</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Permissions Tab -->
+            <div class="tab-content" id="tab-permissions">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>🛡️ Android Permission Model</h3>
+                        <div class="mindmap-container" id="mmPermissions" style="min-height:320px"></div>
+                    </div>
+                    <div class="card">
+                        <h3>⚠️ Permission Levels</h3>
+                        <table>
+                            <tr><th>Level</th><th>Description</th><th>Example</th></tr>
+                            <tr><td><strong>Normal</strong></td><td>Granted automatically at install; low risk</td><td>INTERNET, VIBRATE, SET_WALLPAPER</td></tr>
+                            <tr><td><strong>Dangerous</strong></td><td>Requires user approval at runtime; accesses private data</td><td>CAMERA, LOCATION, CONTACTS, SMS, STORAGE</td></tr>
+                            <tr><td><strong>Signature</strong></td><td>Only apps signed with the same certificate</td><td>System-level features</td></tr>
+                            <tr><td><strong>Custom</strong></td><td>App-defined permission for its own components</td><td>com.example.MY_PERMISSION</td></tr>
+                        </table>
+                        <div class="code-block" style="position:relative;margin-top:12px">
+                            <span class="code-label">Custom Permission Declaration</span>
+                            <pre><span class="comment">&lt;!-- Define a custom permission --&gt;</span>
+&lt;<span class="tag">permission</span>
+    <span class="attr">android:name</span>=<span class="value">"com.example.READ_SECRET_DATA"</span>
+    <span class="attr">android:protectionLevel</span>=<span class="value">"signature"</span> /&gt;
+
+<span class="comment">&lt;!-- Use it on an exported component --&gt;</span>
+&lt;<span class="tag">provider</span>
+    <span class="attr">android:name</span>=<span class="value">".SecretProvider"</span>
+    <span class="attr">android:exported</span>=<span class="value">"true"</span>
+    <span class="attr">android:permission</span>=<span class="value">"com.example.READ_SECRET_DATA"</span>
+    <span class="attr">android:authorities</span>=<span class="value">"com.example.secret"</span>/&gt;
+
+<span class="comment">&lt;!-- Apps that want access must declare: --&gt;</span>
+<span class="comment">&lt;!-- &lt;uses-permission android:name="com.example.READ_SECRET_DATA"/&gt; --&gt;</span></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ STATIC ANALYSIS ============ -->
+        <section class="section" id="section-static">
+            <h2>🔍 Static Analysis</h2>
+            <p style="color:var(--text2);margin-bottom:16px">Analyzing APKs without executing them — decompilation, manifest review, hardcoded secrets.</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🛠️ Static Analysis Methodology</h3>
+                    <div class="flowchart">
+                        <div class="flow-node" style="background:#e53935;color:#fff">1. Receive APK</div>
+                        <div class="flow-arrow">⬇</div>
+                        <div class="flow-node" style="background:#ff6d00;color:#fff">2. Run MobSF (automated scan)</div>
+                        <div class="flow-arrow">⬇</div>
+                        <div class="flow-node" style="background:#ff8f00;color:#fff">3. Decompile with JADX</div>
+                        <div class="flow-arrow">⬇</div>
+                        <div class="flow-branch">
+                            <div class="flow-col">
+                                <div class="flow-node" style="background:#3366cc;color:#fff">4a. Review Manifest</div>
+                                <div class="flow-arrow">⬇</div>
+                                <div class="flow-node" style="background:#3366cc;color:#fff">exported components</div>
+                            </div>
+                            <div class="flow-col">
+                                <div class="flow-node" style="background:#673ab7;color:#fff">4b. Search for secrets</div>
+                                <div class="flow-arrow">⬇</div>
+                                <div class="flow-node" style="background:#673ab7;color:#fff">API keys, tokens, creds</div>
+                            </div>
+                            <div class="flow-col">
+                                <div class="flow-node" style="background:#00897b;color:#fff">4c. Analyze code</div>
+                                <div class="flow-arrow">⬇</div>
+                                <div class="flow-node" style="background:#00897b;color:#fff">crypto, auth logic</div>
+                            </div>
+                        </div>
+                        <div class="flow-arrow">⬇</div>
+                        <div class="flow-node" style="background:#4caf50;color:#fff">5. Document findings</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🔧 Essential Tools</h3>
+                    <table>
+                        <tr><th>Tool</th><th>Command / Usage</th><th>Output</th></tr>
+                        <tr>
+                            <td><strong>JADX</strong></td>
+                            <td style="font-family:monospace;font-size:0.8rem">jadx-gui app.apk</td>
+                            <td>Java source code (GUI)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>apktool</strong></td>
+                            <td style="font-family:monospace;font-size:0.8rem">apktool d app.apk -o output/</td>
+                            <td>Smali code + decoded resources</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MobSF</strong></td>
+                            <td style="font-family:monospace;font-size:0.8rem">docker run -p 8000:8000 opensecurity/mobsf</td>
+                            <td>Automated report (web UI)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>strings</strong></td>
+                            <td style="font-family:monospace;font-size:0.8rem">strings app.apk | grep -i "api_key\|token\|secret"</td>
+                            <td>Hardcoded string matches</td>
+                        </tr>
+                        <tr>
+                            <td><strong>dex2jar</strong></td>
+                            <td style="font-family:monospace;font-size:0.8rem">d2j-dex2jar classes.dex</td>
+                            <td>JAR for JD-GUI analysis</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bytecode Viewer</strong></td>
+                            <td style="font-family:monospace;font-size:0.8rem">(GUI tool)</td>
+                            <td>Multi-decompiler comparison</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:12px">
+                <div class="card">
+                    <h3>🔑 Hardcoded Secrets Checklist</h3>
+                    <p>Use JADX's text search for these patterns:</p>
+                    <table>
+                        <tr><th>Pattern</th><th>What to Look For</th></tr>
+                        <tr><td><code>api_key</code>, <code>apiKey</code>, <code>API_KEY</code></td><td>Third-party API keys (Google, AWS, Stripe)</td></tr>
+                        <tr><td><code>password</code>, <code>passwd</code>, <code>pwd</code></td><td>Hardcoded passwords / database creds</td></tr>
+                        <tr><td><code>secret</code>, <code>SECRET</code>, <code>private</code></td><td>JWT secrets, encryption keys</td></tr>
+                        <tr><td><code>token</code>, <code>AUTH_TOKEN</code>, <code>bearer</code></td><td>Auth tokens baked into code</td></tr>
+                        <tr><td><code>AWS_</code>, <code>AZURE_</code>, <code>GCP_</code></td><td>Cloud provider credentials</td></tr>
+                        <tr><td><code>BEGIN RSA PRIVATE KEY</code></td><td>Embedded private keys</td></tr>
+                        <tr><td><code>jdbc:</code>, <code>mysql://</code>, <code>mongodb://</code></td><td>Database connection strings</td></tr>
+                        <tr><td><code>http://</code> (not https)</td><td>Insecure endpoints</td></tr>
+                        <tr><td><code>firebaseio.com</code></td><td>Firebase URLs (check read access)</td></tr>
+                    </table>
+                    <div class="terminal">
+                        <span class="prompt">$ </span><span class="cmd">grep -rE "(api[_-]?key|secret|password|token|private.key)" jadx_output/</span>
+                        <br><span class="output">com/example/config.java: String API_KEY = "sk_live_abc123xyz";</span>
+                        <br><span class="output">⚠️ Found: Stripe live key exposed!</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📝 What is Smali?</h3>
+                    <p><strong>Smali</strong> is the human-readable assembly language for Android's Dalvik VM bytecode. When JADX can't decompile a method, you can read/modify the smali directly.</p>
+                    <div class="code-block" style="position:relative">
+                        <span class="code-label">Smali Example</span>
+                        <pre><span class="comment"># Java: boolean isAdmin = checkAdmin(user);</span>
+<span class="comment"># Smali:</span>
+<span class="keyword">invoke-static</span> {p1}, Lcom/example/Auth;-&gt;checkAdmin(Ljava/lang/String;)Z
+<span class="keyword">move-result</span> v0
+<span class="keyword">if-eqz</span> v0, :cond_not_admin   <span class="comment"># Jump if false</span>
+
+<span class="comment"># To bypass auth: change if-eqz to if-nez</span>
+<span class="comment"># Or: always set v0 = 1 (true) before the check</span></pre>
+                    </div>
+                    <p><strong>apktool</strong> produces smali files. You can modify them and repack: <code>apktool b output/ -o patched.apk</code></p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+                <h3>🏗️ Decompilation Pipeline</h3>
+                <div class="mindmap-container" id="mmDecompile" style="min-height:280px"></div>
+            </div>
+        </section>
+
+        <!-- ============ COMPONENTS ============ -->
+        <section class="section" id="section-components">
+            <h2>🧩 Component Vulnerabilities</h2>
+            <p style="color:var(--text2);margin-bottom:16px">Exploiting exported Activities, Services, Broadcast Receivers, and Content Providers.</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🎯 Exported Activity Vulnerability</h3>
+                    <p>When <code>android:exported="true"</code> (or an intent-filter is declared), ANY app can launch the Activity.</p>
+                    <div class="scenario-card">
+                        <div class="q">🔴 Scenario: Bypass Login</div>
+                        <ul class="steps">
+                            <li>Find exported Activity in Manifest: <code>com.example.DashboardActivity</code></li>
+                            <li>Check if it has auth checks (JADX review)</li>
+                            <li>Launch directly: <code>adb shell am start -n com.example/.DashboardActivity</code></li>
+                            <li>If Dashboard loads without credentials → bypass confirmed</li>
+                        </ul>
+                    </div>
+                    <div class="scenario-card">
+                        <div class="q">🔴 Scenario: Intent Extra Manipulation</div>
+                        <ul class="steps">
+                            <li>Activity reads <code>getIntent().getStringExtra("user_id")</code></li>
+                            <li>Launch with modified extra: <code>adb shell am start -n com.example/.ProfileActivity --es user_id "9999"</code></li>
+                            <li>If you can view another user's profile → IDOR via Intent</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📻 Broadcast Receiver Spoofing</h3>
+                    <p>An exported Receiver trusts broadcasts from anywhere. Attackers can forge them.</p>
+                    <div class="scenario-card">
+                        <div class="q">🔴 Scenario: Trigger Sensitive Action</div>
+                        <ul class="steps">
+                            <li>Receiver <code>ResetPasswordReceiver</code> is exported</li>
+                            <li>It resets password when receiving <code>RESET_PASSWORD</code> action</li>
+                            <li>Spoof it: <code>adb shell am broadcast -a com.example.RESET_PASSWORD --es email "victim@test.com"</code></li>
+                            <li>Password reset triggered without authentication → critical</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🗄️ Content Provider Exploitation</h3>
+                    <p>Exported Content Providers can leak data, be vulnerable to SQL injection, or path traversal.</p>
+                    <table>
+                        <tr><th>Test</th><th>Command</th></tr>
+                        <tr><td>Query data</td><td><code>adb shell content query --uri content://com.example.provider/users</code></td></tr>
+                        <tr><td>Path traversal</td><td><code>adb shell content read --uri content://com.example.provider/../../../etc/hosts</code></td></tr>
+                        <tr><td>SQL injection</td><td><code>adb shell content query --uri "content://com.example.provider/users?--"</code></td></tr>
+                        <tr><td>Insert data</td><td><code>adb shell content insert --uri content://com.example.provider/users --bind name:s:attacker</code></td></tr>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h3>🔄 Intent Redirection</h3>
+                    <p>When an app takes an embedded Intent from incoming data and forwards it — attacker controls where it goes.</p>
+                    <div class="code-block" style="position:relative">
+                        <span class="code-label">Vulnerable Pattern</span>
+                        <pre><span class="comment">// Attacker sends Intent with an embedded Intent inside</span>
+Intent attackerIntent = <span class="keyword">new</span> Intent();
+attackerIntent.putExtra(<span class="string">"forwarded_intent"</span>, maliciousEmbeddedIntent);
+<span class="comment">// Victim app blindly forwards it:</span>
+Parcelable extra = getIntent().getParcelableExtra(<span class="string">"forwarded_intent"</span>);
+startActivity((Intent) extra);  <span class="comment">// ⚠️ Launches attacker's chosen component!</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+                <h3>⚠️ PendingIntent Security</h3>
+                <div class="grid-2">
+                    <div>
+                        <p><strong>What:</strong> A token that lets a foreign app execute an Intent with YOUR app's identity/permissions.</p>
+                        <p><strong>Risk:</strong> If <code>PendingIntent.FLAG_MUTABLE</code> is set (Android 12+), the receiver can modify the Intent — changing the target component, adding extras, etc.</p>
+                        <div class="code-block" style="position:relative;margin-top:8px">
+                            <span class="code-label">Secure vs Insecure</span>
+                            <pre><span class="comment">// ✅ Secure (Android 12+):</span>
+PendingIntent.getActivity(ctx, 0, intent,
+    PendingIntent.FLAG_IMMUTABLE);
+
+<span class="comment">// ⚠️ Insecure — receiver can modify:</span>
+PendingIntent.getActivity(ctx, 0, intent,
+    PendingIntent.FLAG_MUTABLE);</pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--accent2)">Additional Component Risks</h4>
+                        <table>
+                            <tr><td><span class="tag tag-vuln">Service Hijacking</span></td><td>Exported Service without permission → any app binds to it</td></tr>
+                            <tr><td><span class="tag tag-vuln">Implicit Intent Interception</span></td><td>No target component → malicious app registers for same action</td></tr>
+                            <tr><td><span class="tag tag-vuln">Fragment Injection</span></td><td>Attacker provides Fragment class name in Intent extra</td></tr>
+                            <tr><td><span class="tag tag-vuln">WebView RCE</span></td><td><code>addJavascriptInterface</code> with exported WebView Activity</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ NETWORK ============ -->
+        <section class="section" id="section-network">
+            <h2>🌐 Network Security</h2>
+            <p style="color:var(--text2);margin-bottom:16px">TLS, certificate pinning, Burp Suite setup, cleartext traffic analysis.</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🔧 Burp Suite Setup for Android</h3>
+                    <div class="flowchart">
+                        <div class="flow-node" style="background:#3366cc;color:#fff">1. Set Burp proxy listener (all interfaces, port 8080)</div>
+                        <div class="flow-arrow">⬇</div>
+                        <div class="flow-node" style="background:#3366cc;color:#fff">2. Export Burp CA cert → push to device</div>
+                        <div class="flow-arrow">⬇</div>
+                        <div class="flow-node" style="background:#3366cc;color:#fff">3. Install cert on device (Settings → Security → Install)</div>
+                        <div class="flow-arrow">⬇</div>
+                        <div class="flow-node" style="background:#3366cc;color:#fff">4. Configure WiFi proxy → Burp IP:8080</div>
+                        <div class="flow-arrow">⬇</div>
+                        <div class="flow-node" style="background:#4caf50;color:#fff">5. Traffic should appear!</div>
+                    </div>
+                    <div class="terminal" style="margin-top:12px">
+                        <span class="prompt">$ </span><span class="cmd">adb push burp-cacert.der /sdcard/</span>
+                        <br><span class="prompt">$ </span><span class="cmd">adb shell settings put global http_proxy 192.168.1.100:8080</span>
+                        <br><span class="output">Proxy set. Now browse on device.</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>❌ Why HTTPS Traffic May NOT Appear</h3>
+                    <table>
+                        <tr><th>Cause</th><th>Solution</th></tr>
+                        <tr><td><strong>Certificate Pinning</strong></td><td>Bypass with Frida/Objection scripts</td></tr>
+                        <tr><td><strong>Proxy not configured</strong></td><td>Check WiFi proxy or use <code>adb reverse</code></td></tr>
+                        <tr><td><strong>Android 7+ — only system CAs trusted</strong></td><td>Root + move cert to system store, or use Frida</td></tr>
+                        <tr><td><strong>Network Security Config blocks user CAs</strong></td><td>Modify NSC in apktool, repack, or Frida patch</td></tr>
+                        <tr><td><strong>Non-HTTP protocol</strong></td><td>WebSockets, raw TCP, gRPC → use Wireshark/tcpdump</td></tr>
+                        <tr><td><strong>App uses custom SSL socket factory</strong></td><td>Hook with Frida to intercept</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:12px">
+                <div class="card">
+                    <h3>📌 Certificate Pinning</h3>
+                    <p>Apps "pin" a specific certificate or public key. They reject any other — including Burp's CA. This is a defense, not a vulnerability.</p>
+                    <div class="code-block" style="position:relative">
+                        <span class="code-label">Pinning Implementation (OkHttp)</span>
+                        <pre>CertificatePinner certPinner = <span class="keyword">new</span> CertificatePinner.Builder()
+    .add(<span class="string">"api.example.com"</span>,
+        <span class="string">"sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="</span>)
+    .build();
+
+OkHttpClient client = <span class="keyword">new</span> OkHttpClient.Builder()
+    .certificatePinner(certPinner)
+    .build();</pre>
+                    </div>
+                    <p><span class="badge badge-blue">💡 Note</span> Bypassing pinning requires root + Frida, or patching the APK. The bypass itself is not a vuln — it just enables further testing.</p>
+                    <div class="terminal">
+                        <span class="prompt">$ </span><span class="cmd">frida -U -l bypass-pinning.js -f com.example.app</span>
+                        <br><span class="output">[+] Certificate pinning bypassed!</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🔓 Cleartext Traffic & NSC</h3>
+                    <p><strong>Network Security Config (NSC)</strong> is an XML file (res/xml/network_security_config.xml) that customizes TLS settings.</p>
+                    <div class="code-block" style="position:relative">
+                        <span class="code-label">Network Security Config</span>
+                        <pre>&lt;<span class="tag">network-security-config</span>&gt;
+    <span class="comment">&lt;!-- ⚠️ Allows cleartext (HTTP) traffic --&gt;</span>
+    &lt;<span class="tag">domain-config</span> <span class="attr">cleartextTrafficPermitted</span>=<span class="value">"true"</span>&gt;
+        &lt;<span class="tag">domain</span> <span class="attr">includeSubdomains</span>=<span class="value">"true"</span>&gt;example.com&lt;/<span class="tag">domain</span>&gt;
+    &lt;/<span class="tag">domain-config</span>&gt;
+
+    <span class="comment">&lt;!-- ⚠️ Trusts user-installed CAs (debug config in production!) --&gt;</span>
+    &lt;<span class="tag">base-config</span>&gt;
+        &lt;<span class="tag">trust-anchors</span>&gt;
+            &lt;<span class="tag">certificates</span> <span class="attr">src</span>=<span class="value">"user"</span>/&gt;
+        &lt;/<span class="tag">trust-anchors</span>&gt;
+    &lt;/<span class="tag">base-config</span>&gt;
+&lt;/<span class="tag">network-security-config</span>&gt;</pre>
+                    </div>
+                    <p>Check in Manifest: <code>android:networkSecurityConfig="@xml/network_security_config"</code></p>
+                    <p><strong>Hostname Verification:</strong> Ensures the certificate CN matches the hostname. Can be disabled with custom <code>HostnameVerifier</code> returning <code>true</code> for all. Check JADX for this.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ STORAGE ============ -->
+        <section class="section" id="section-storage">
+            <h2>💾 Data Storage Security</h2>
+            <p style="color:var(--text2);margin-bottom:16px">Insecure storage, SharedPreferences risks, Keystore, backups, Logcat leaks.</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>📂 Where Android Apps Store Data</h3>
+                    <table>
+                        <tr><th>Location</th><th>Path</th><th>Risk</th></tr>
+                        <tr><td><strong>Internal Storage</strong></td><td><code>/data/data/com.app/</code></td><td>Private to app (unless root)</td></tr>
+                        <tr><td><strong>External Storage</strong></td><td><code>/sdcard/Android/data/com.app/</code></td><td><span class="badge badge-red">Readable by other apps</span></td></tr>
+                        <tr><td><strong>SharedPreferences</strong></td><td><code>/data/data/com.app/shared_prefs/*.xml</code></td><td><span class="badge badge-red">Plain XML — world-readable if wrong mode</span></td></tr>
+                        <tr><td><strong>SQLite Database</strong></td><td><code>/data/data/com.app/databases/*.db</code></td><td><span class="badge badge-red">No encryption by default</span></td></tr>
+                        <tr><td><strong>Keystore</strong></td><td>Hardware-backed (TEE)</td><td><span class="badge badge-green">Most secure</span></td></tr>
+                        <tr><td><strong>Cloud Backup</strong></td><td>Google Drive (if allowBackup=true)</td><td><span class="badge badge-red">Data uploaded to cloud!</span></td></tr>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h3>⚠️ SharedPreferences Risks</h3>
+                    <p>Stores key-value pairs as plain XML. <strong>Not encrypted!</strong></p>
+                    <div class="code-block" style="position:relative">
+                        <span class="code-label">Insecure Storage Example</span>
+                        <pre><span class="comment">// ⚠️ DON'T DO THIS:</span>
+SharedPreferences prefs = getSharedPreferences(<span class="string">"auth"</span>, MODE_PRIVATE);
+prefs.edit()
+    .putString(<span class="string">"access_token"</span>, <span class="string">"eyJhbGciOiJ..."</span>)
+    .putString(<span class="string">"user_password"</span>, <span class="string">"P@ssw0rd123"</span>)
+    .putBoolean(<span class="string">"is_admin"</span>, <span class="keyword">true</span>)
+    .apply();
+
+<span class="comment">// ✅ DO THIS (EncryptedSharedPreferences):</span>
+MasterKey masterKey = <span class="keyword">new</span> MasterKey.Builder(context)
+    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+    .build();
+SharedPreferences securePrefs = EncryptedSharedPreferences.create(
+    context, <span class="string">"secure_auth"</span>, masterKey,
+    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+);</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:12px">
+                <div class="card">
+                    <h3>🔐 Android Keystore</h3>
+                    <p>Hardware-backed key storage (Trusted Execution Environment). Keys never leave secure hardware.</p>
+                    <div class="code-block" style="position:relative">
+                        <span class="code-label">Keystore Usage</span>
+                        <pre>KeyGenParameterSpec spec = <span class="keyword">new</span> KeyGenParameterSpec.Builder(
+    <span class="string">"my_key_alias"</span>,
+    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT
+)
+    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+    .setUserAuthenticationRequired(<span class="keyword">true</span>) <span class="comment">// Requires biometric/PIN</span>
+    .build();</pre>
+                    </div>
+                    <p><span class="badge badge-green">✅ Best Practice:</span> Store auth tokens in EncryptedSharedPreferences with Keystore-backed keys, NOT in plain SharedPreferences.</p>
+                </div>
+
+                <div class="card">
+                    <h3>📋 Backup & Logging Risks</h3>
+                    <table>
+                        <tr><th>Issue</th><th>How to Test</th></tr>
+                        <tr>
+                            <td><strong>allowBackup=true</strong></td>
+                            <td><code>adb backup -apk com.example.app -f backup.ab</code><br>Then extract: <code>dd if=backup.ab bs=24 skip=1 | openssl zlib -d > backup.tar</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Logcat Leaks</strong></td>
+                            <td><code>adb logcat | grep -iE "token|password|secret|auth|bearer|api.key"</code><br>Any app with READ_LOGS can see these!</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Temp/Cache Files</strong></td>
+                            <td>Check <code>/data/data/com.app/cache/</code> for sensitive data in temp files</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Keyboard Cache</strong></td>
+                            <td>Disable autocorrect suggestions for sensitive fields (textNoSuggestions)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ AUTH ============ -->
+        <section class="section" id="section-auth">
+            <h2>🔐 Authentication & Authorization</h2>
+            <p style="color:var(--text2);margin-bottom:16px">JWT analysis, IDOR/BOLA, session management, client-side trust issues.</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🎯 Auth vs Authz vs IDOR</h3>
+                    <table>
+                        <tr><th>Concept</th><th>Question It Answers</th><th>Where to Test</th></tr>
+                        <tr><td><strong>Authentication</strong></td><td>"Who are you?"</td><td>Login, biometric, MFA flows</td></tr>
+                        <tr><td><strong>Authorization</strong></td><td>"What can you do?"</td><td>Role checks, access controls</td></tr>
+                        <tr><td><strong>IDOR/BOLA</strong></td><td>"Can you access object X as user Y?"</td><td>API endpoints with resource IDs</td></tr>
+                    </table>
+                    <div class="scenario-card" style="margin-top:12px">
+                        <div class="q">🔴 IDOR Test: Change user_id in API request</div>
+                        <ul class="steps">
+                            <li>Login as User A, capture profile API: <code>GET /api/user/1234/profile</code></li>
+                            <li>Change to User B's ID: <code>GET /api/user/5678/profile</code></li>
+                            <li>If you get User B's data → IDOR confirmed</li>
+                            <li>Same for PATCH/PUT: try modifying another user's data</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🔑 JWT Testing Checklist</h3>
+                    <div class="terminal">
+                        <span class="prompt">$ </span><span class="cmd"># Decode JWT:</span>
+                        <br><span class="output">Header: {"alg":"RS256","typ":"JWT"}</span>
+                        <br><span class="output">Payload: {"sub":"1234","role":"user","exp":9999999999}</span>
+                        <br><span class="prompt">$ </span><span class="cmd"># Tests to perform:</span>
+                        <br><span class="output">1. Change alg:none → remove signature</span>
+                        <br><span class="output">2. Change role:user → role:admin</span>
+                        <br><span class="output">3. Change sub:1234 → sub:5678 (IDOR via JWT)</span>
+                        <br><span class="output">4. Set exp far in future (or past for testing)</span>
+                        <br><span class="output">5. Try HMAC key confusion (RS256→HS256)</span>
+                    </div>
+                    <p><span class="badge badge-red">⚠️ Critical</span> Never trust role values from the mobile app (JWT payload, SharedPreferences, or Intent extras). Authorization MUST be enforced server-side.</p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+                <h3>🚫 What NOT to Trust (Client-Side)</h3>
+                <table>
+                    <tr><th>Data Source</th><th>Why It Can't Be Trusted</th></tr>
+                    <tr><td><code>SharedPreferences</code> role flag</td><td>Root → read/write any value</td></tr>
+                    <tr><td>JWT payload (locally modified)</td><td>Signature may not be validated properly server-side</td></tr>
+                    <tr><td>Intent extras (<code>is_admin</code>)</td><td>Attacker controls all extras from external Intents</td></tr>
+                    <tr><td>Client-side biometric result</td><td>Can be bypassed with Frida</td></tr>
+                    <tr><td>Local DB row for "user role"</td><td>Root → SQLite modification</td></tr>
+                    <tr><td>API response body cached locally</td><td>Tampered to show fake "admin" UI</td></tr>
+                </table>
+                <p style="margin-top:8px"><span class="badge badge-red">Golden Rule:</span> The backend is the single source of truth. The mobile app is an untrusted client.</p>
+            </div>
+        </section>
+
+        <!-- ============ REVERSE ENGINEERING ============ -->
+        <section class="section" id="section-reverse">
+            <h2>🔧 Reverse Engineering & Dynamic Analysis</h2>
+            <p style="color:var(--text2);margin-bottom:16px">Frida, Objection, runtime instrumentation, method hooking.</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🔄 Static vs Dynamic Analysis</h3>
+                    <table>
+                        <tr><th>Aspect</th><th>Static</th><th>Dynamic</th></tr>
+                        <tr><td><strong>When</strong></td><td>Without running the app</td><td>While the app is running</td></tr>
+                        <tr><td><strong>Tools</strong></td><td>JADX, apktool, MobSF</td><td>Frida, Objection, Burp, ADB</td></tr>
+                        <tr><td><strong>What you see</strong></td><td>Source code, resources, config</td><td>Runtime behavior, API calls, crypto</td></tr>
+                        <tr><td><strong>Best for</strong></td><td>Hardcoded secrets, manifest, permissions</td><td>Pinning bypass, auth flow, runtime crypto</td></tr>
+                        <tr><td><strong>Limitation</strong></td><td>Can't see obfuscated/crypted data</td><td>Can't see all code paths at once</td></tr>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h3>🪝 Frida & Objection</h3>
+                    <table>
+                        <tr><th>Tool</th><th>Purpose</th><th>Example Command</th></tr>
+                        <tr><td><strong>Frida</strong></td><td>Dynamic instrumentation framework</td><td><code>frida -U -l script.js com.app</code></td></tr>
+                        <tr><td><strong>Objection</strong></td><td>Runtime exploration toolkit (built on Frida)</td><td><code>objection -g com.app explore</code></td></tr>
+                    </table>
+                    <div class="code-block" style="position:relative;margin-top:8px">
+                        <span class="code-label">Frida Hook Example</span>
+                        <pre><span class="comment">// Hook a method to see its arguments and return value</span>
+Java.perform(<span class="keyword">function</span>() {
+    <span class="keyword">var</span> AuthClass = Java.use(<span class="string">"com.example.AuthManager"</span>);
+    AuthClass.getToken.implementation = <span class="keyword">function</span>(username, password) {
+        console.log(<span class="string">"[+] getToken called!"</span>);
+        console.log(<span class="string">"    username: "</span> + username);
+        console.log(<span class="string">"    password: "</span> + password);
+        <span class="keyword">var</span> result = <span class="keyword">this</span>.getToken(username, password);
+        console.log(<span class="string">"    token: "</span> + result);
+        <span class="keyword">return</span> result;
+    };
+});</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:12px">
+                <div class="card">
+                    <h3>🔍 Objection Commands</h3>
+                    <div class="terminal">
+                        <span class="prompt">objection&gt; </span><span class="cmd">android hooking list classes</span>
+                        <br><span class="output">[+] Listing loaded classes...</span>
+                        <br><span class="prompt">objection&gt; </span><span class="cmd">android hooking search classes auth</span>
+                        <br>
+                        <span class="output">com.example.auth.AuthManager</span>
+                        <br><span class="prompt">objection&gt; </span><span class="cmd">android hooking watch class com.example.auth.AuthManager</span>
+                        <br><span class="output">[+] Watching all methods in AuthManager</span>
+                        <br><span class="prompt">objection&gt; </span><span class="cmd">android sslpinning disable</span>
+                        <br><span class="output">[+] Certificate pinning disabled</span>
+                        <br><span class="prompt">objection&gt; </span><span class="cmd">android root disable</span>
+                        <br><span class="output">[+] Root detection bypassed</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🛡️ Root Detection</h3>
+                    <p><strong>How apps detect root:</strong></p>
+                    <table>
+                        <tr><th>Method</th><th>Detection</th></tr>
+                        <tr><td>Check for <code>su</code> binary</td><td><code>which su</code> or check common paths</td></tr>
+                        <tr><td>Check for root apps</td><td>Magisk Manager, SuperSU package names</td></tr>
+                        <tr><td>Check <code>ro.build.tags</code></td><td>If contains "test-keys"</td></tr>
+                        <tr><td>Check system partition</td><td>If mounted as r/w</td></tr>
+                        <tr><td>SafetyNet / Play Integrity</td><td>Google's attestation API</td></tr>
+                    </table>
+                    <p><span class="badge badge-blue">💡 Note:</span> Root detection is NOT a vulnerability. It's a security control. But it can be bypassed with Frida/Objection/Magisk Hide.</p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+                <h3>📱 ADB Power Tools</h3>
+                <div class="terminal">
+                    <span class="prompt">$ </span><span class="cmd">adb devices</span>
+                    <br><span class="output">List connected devices/emulators</span>
+                    <br><span class="prompt">$ </span><span class="cmd">adb shell</span>
+                    <br><span class="output">Open device shell</span>
+                    <br><span class="prompt">$ </span><span class="cmd">adb install app.apk</span>
+                    <br><span class="output">Install APK</span>
+                    <br><span class="prompt">$ </span><span class="cmd">adb pull /data/data/com.app/shared_prefs/ ./dump/</span>
+                    <br><span class="output">Pull app data to local machine</span>
+                    <br><span class="prompt">$ </span><span class="cmd">adb logcat -s TAG_NAME</span>
+                    <br><span class="output">Filter logs by tag</span>
+                    <br><span class="prompt">$ </span><span class="cmd">adb backup -apk com.app -f backup.ab</span>
+                    <br><span class="output">Create full backup (if allowBackup=true)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ DEEP LINKS ============ -->
+        <section class="section" id="section-deeplinks">
+            <h2>🔗 Deep Links</h2>
+            <p style="color:var(--text2);margin-bottom:16px">Deep links, App Links, Intent redirection, auth bypass via deep links.</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🔗 Deep Links vs App Links</h3>
+                    <table>
+                        <tr><th>Type</th><th>URI Scheme</th><th>Verification</th><th>Security</th></tr>
+                        <tr>
+                            <td><strong>Deep Link</strong></td>
+                            <td>Custom: <code>myapp://</code>,<br>or <code>http://</code> / <code>https://</code></td>
+                            <td>No verification</td>
+                            <td><span class="badge badge-red">Can be hijacked</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>App Link</strong><br>(Android 6+)</td>
+                            <td><code>https://</code> only</td>
+                            <td>Verified via<br><code>/.well-known/assetlinks.json</code></td>
+                            <td><span class="badge badge-green">Secure</span></td>
+                        </tr>
+                    </table>
+                    <div class="code-block" style="position:relative;margin-top:12px">
+                        <span class="code-label">Deep Link Intent Filter</span>
+                        <pre>&lt;<span class="tag">activity</span> <span class="attr">android:name</span>=<span class="value">".WebViewActivity"</span>&gt;
+    &lt;<span class="tag">intent-filter</span>&gt;
+        &lt;<span class="tag">action</span> <span class="attr">android:name</span>=<span class="value">"android.intent.action.VIEW"</span>/&gt;
+        &lt;<span class="tag">category</span> <span class="attr">android:name</span>=<span class="value">"android.intent.category.DEFAULT"</span>/&gt;
+        &lt;<span class="tag">category</span> <span class="attr">android:name</span>=<span class="value">"android.intent.category.BROWSABLE"</span>/&gt;
+        &lt;<span class="tag">data</span> <span class="attr">android:scheme</span>=<span class="value">"myapp"</span> <span class="attr">android:host</span>=<span class="value">"open"</span>/&gt;
+    &lt;/<span class="tag">intent-filter</span>&gt;
+&lt;/<span class="tag">activity</span>&gt;</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🔥 Deep Link Vulnerabilities</h3>
+                    <table>
+                        <tr><th>Vulnerability</th><th>How to Test</th></tr>
+                        <tr>
+                            <td><strong>Auth Bypass</strong></td>
+                            <td>Deep link to protected screen: <code>adb shell am start -d "myapp://dashboard"</code><br>If it loads without login → bypass</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Leak via Extras</strong></td>
+                            <td>Check if deep link passes <code>token=xxx</code> in URI — extractable by other apps</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Intent Redirection</strong></td>
+                            <td>Deep link may contain an embedded Intent as parameter</td>
+                        </tr>
+                        <tr>
+                            <td><strong>XSS in WebView</strong></td>
+                            <td>If deep link opens URL in WebView with JS enabled</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Schema Hijacking</strong></td>
+                            <td>Multiple apps register for same custom scheme → user gets disambiguation dialog</td>
+                        </tr>
+                    </table>
+                    <div class="terminal" style="margin-top:8px">
+                        <span class="prompt">$ </span><span class="cmd"># Test deep link:</span>
+                        <br><span class="prompt">$ </span><span class="cmd">adb shell am start -W -a android.intent.action.VIEW -d "myapp://profile?user_id=9999"</span>
+                        <br><span class="prompt">$ </span><span class="cmd"># Test with encoded URI:</span>
+                        <br><span class="prompt">$ </span><span class="cmd">adb shell am start -d "myapp://reset_password?token=admin123"</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ SCENARIOS ============ -->
+        <section class="section" id="section-scenarios">
+            <h2>🔥 Interview Scenario Walkthroughs</h2>
+            <p style="color:var(--text2);margin-bottom:16px">Practice these out loud. These are the questions interviewers love.</p>
+
+            <div class="scenario-card">
+                <div class="q">🔴 Q118: You receive an APK. Walk me through your complete testing methodology.</div>
+                <ul class="steps">
+                    <li><strong>Phase 1 — Recon:</strong> Run MobSF for automated scan. Review the report for high-level issues.</li>
+                    <li><strong>Phase 2 — Static Analysis:</strong> Decompile with JADX. Review AndroidManifest.xml for exported components, allowBackup, debuggable, cleartextTraffic. Search code for hardcoded secrets (API keys, tokens, passwords, private keys). Analyze crypto implementation. Map all deeplinks.</li>
+                    <li><strong>Phase 3 — Dynamic Analysis:</strong> Install on rooted device. Set up Burp intercept. Bypass certificate pinning if present. Exercise all app functionality while monitoring Burp + Logcat. Test API endpoints for IDOR. Test exported components with ADB/drozer.</li>
+                    <li><strong>Phase 4 — Storage:</strong> Pull app data directory. Check SharedPreferences, SQLite DBs, cache, temp files. Perform ADB backup if allowBackup=true.</li>
+                    <li><strong>Phase 5 — Runtime:</strong> Use Frida/Objection for runtime analysis. Hook auth functions. Bypass root detection if blocking. Monitor crypto operations.</li>
+                    <li><strong>Phase 6 — Report:</strong> Document findings with severity, proof of concept, and remediation.</li>
+                </ul>
+            </div>
+
+            <div class="scenario-card">
+                <div class="q">🔴 Q119: Exported Activity — is it actually vulnerable?</div>
+                <ul class="steps">
+                    <li>Step 1: In JADX, check if the Activity validates the calling package (<code>getCallingPackage()</code>).</li>
+                    <li>Step 2: Check if it requires a permission (via Manifest or <code>checkCallingPermission()</code>).</li>
+                    <li>Step 3: Check if it reads Intent extras and uses them for auth decisions (user_id, role, token).</li>
+                    <li>Step 4: Check if it performs sensitive actions (data access, settings change, navigation to protected screens).</li>
+                    <li>Step 5: If no checks → launch it from another app/ADB. If it performs the action → vulnerable.</li>
+                </ul>
+            </div>
+
+            <div class="scenario-card">
+                <div class="q">🔴 Q120: Exported Activity accepts user_id via Intent Extra — what to test?</div>
+                <ul class="steps">
+                    <li>Test IDOR: <code>adb shell am start -n com.app/.ProfileActivity --es user_id "9999"</code> — see if you can view another user's data.</li>
+                    <li>Test privilege escalation: Check if modifying a role extra changes behavior.</li>
+                    <li>Test injection: Pass special characters, SQL injection payloads, path traversal in the extra.</li>
+                    <li>Test that the backend re-validates user_id — the mobile app should NEVER trust client-provided user IDs for auth.</li>
+                </ul>
+            </div>
+
+            <div class="scenario-card">
+                <div class="q">🔴 Q121: Auth token in SharedPreferences — risk & remediation</div>
+                <ul class="steps">
+                    <li><strong>Risk:</strong> Any app with root access (or ADB backup) can read the plain XML file and steal the token → account takeover.</li>
+                    <li><strong>Remediation:</strong> Use EncryptedSharedPreferences with Android Keystore-backed keys. Or use the Keystore directly. Never store tokens in plaintext.</li>
+                    <li><strong>Additional:</strong> Tokens should have short expiry, be refreshable, and be revocable server-side.</li>
+                </ul>
+            </div>
+
+            <div class="scenario-card">
+                <div class="q">🔴 Q122: App doesn't show HTTPS traffic in Burp</div>
+                <ul class="steps">
+                    <li>Check 1: Is Burp proxy set correctly? (WiFi proxy or adb reverse)</li>
+                    <li>Check 2: Is Burp CA installed as user cert? (Needs system cert on Android 7+)</li>
+                    <li>Check 3: Certificate pinning? → Use Frida/Objection to bypass.</li>
+                    <li>Check 4: Network Security Config blocking user CAs? → Patch or bypass.</li>
+                    <li>Check 5: Non-HTTP traffic (WebSocket, raw TCP)? → Use Wireshark/tcpdump.</li>
+                    <li>Check 6: App using custom trust manager? → Hook it with Frida.</li>
+                </ul>
+            </div>
+
+            <div class="scenario-card">
+                <div class="q">🔴 Q125: No login bypass, but API lets you change another user's profile</div>
+                <ul class="steps">
+                    <li>This is <strong>IDOR (Insecure Direct Object Reference)</strong> / Broken Object Level Authorization (BOLA).</li>
+                    <li>The app properly authenticates BUT fails to check: Does user X have permission to modify user Y's profile?</li>
+                    <li>Vulnerability is server-side: the API endpoint doesn't validate resource ownership.</li>
+                    <li>Test by changing resource IDs in API requests while authenticated as a different user.</li>
+                </ul>
+            </div>
+
+            <div class="scenario-card">
+                <div class="q">🔴 Q126: Change role from user to admin — UI shows admin. Is it a vulnerability?</div>
+                <ul class="steps">
+                    <li><strong>Maybe, but NOT automatically.</strong> If only the UI changes client-side (showing admin buttons) but the API still rejects admin operations → it's a UI bug, not a critical vuln.</li>
+                    <li>BUT if the modified role value is sent to the backend and the backend TRUSTS it → critical authorization bypass.</li>
+                    <li>Always check: does the backend independently determine the user's role, or does it trust what the client sends?</li>
+                </ul>
+            </div>
+
+            <div class="scenario-card">
+                <div class="q">🔴 Q128: API key found inside APK — is it a vulnerability?</div>
+                <ul class="steps">
+                    <li><strong>It depends on the key type:</strong></li>
+                    <li>Public API keys (Google Maps, Firebase config) → expected to be in client. Not a vulnerability.</li>
+                    <li>Secret API keys (Stripe live secret, AWS secret key, private signing keys) → CRITICAL vulnerability. These should NEVER be in client code.</li>
+                    <li>Check the key's scope: test what you can do with it. If it grants admin access to cloud resources → critical.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ============ QUIZ ============ -->
+        <section class="section" id="section-quiz">
+            <h2>🎯 Interactive Quiz</h2>
+            <p style="color:var(--text2);margin-bottom:16px">Test your knowledge! Click an answer to reveal the explanation.</p>
+            <div class="quiz-container" id="quizContainer">
+                <div id="quizQuestion" class="quiz-question"></div>
+                <div id="quizOptions"></div>
+                <div id="quizFeedback"></div>
+                <button class="tab-btn" id="nextQuizBtn" style="margin-top:12px;display:none" onclick="nextQuiz()">
+                    Next Question →
+                </button>
+                <div class="progress-bar" style="margin-top:12px">
+                    <div class="progress-fill" id="quizProgress" style="width:0%"></div>
+                </div>
+                <div style="text-align:center;color:var(--text3);font-size:0.8rem;margin-top:4px">
+                    Question <span id="quizCurrent">1</span> of <span id="quizTotal">15</span> |
+                    Score: <span id="quizScore" style="color:var(--green)">0</span>/<span id="quizMax">15</span>
+                </div>
+            </div>
+
+            <h3 style="margin-top:24px">🃏 Flashcard Review</h3>
+            <p style="color:var(--text2);margin-bottom:12px">Click cards to flip and reveal the answer!</p>
+            <div class="grid-3" id="flashcardGrid"></div>
+        </section>
+
+    </div>
+
+    <script>
+        // ==================== NAVIGATION ====================
+        function switchSection(sectionName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            const section = document.getElementById('section-' + sectionName);
+            if (section) section.classList.add('active');
+            const tab = document.querySelector(`[data-section="${sectionName}"]`);
+            if (tab) tab.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => switchSection(tab.dataset.section));
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            if (query.length < 2) return;
+            const searchMap = {
+                'activity': 'fundamentals',
+                'service': 'fundamentals',
+                'intent': 'fundamentals',
+                'manifest': 'fundamentals',
+                'apk': 'fundamentals',
+                'permission': 'fundamentals',
+                'broadcast': 'fundamentals',
+                'content provider': 'fundamentals',
+                'ipc': 'fundamentals',
+                'jadx': 'static',
+                'mobsf': 'static',
+                'apktool': 'static',
+                'smali': 'static',
+                'decompile': 'static',
+                'hardcoded': 'static',
+                'api key': 'static',
+                'secret': 'static',
+                'exported': 'components',
+                'intent redirection': 'components',
+                'pendingintent': 'components',
+                'spoofing': 'components',
+                'burp': 'network',
+                'certificate': 'network',
+                'pinning': 'network',
+                'tls': 'network',
+                'cleartext': 'network',
+                'sharedpreferences': 'storage',
+                'sqlite': 'storage',
+                'keystore': 'storage',
+                'logcat': 'storage',
+                'backup': 'storage',
+                'jwt': 'auth',
+                'idor': 'auth',
+                'authentication': 'auth',
+                'authorization': 'auth',
+                'bola': 'auth',
+                'frida': 'reverse',
+                'objection': 'reverse',
+                'root': 'reverse',
+                'adb': 'reverse',
+                'deep link': 'deeplinks',
+                'app link': 'deeplinks',
+                'scenario': 'scenarios',
+                'quiz': 'quiz',
+            };
+            for (const [key, section] of Object.entries(searchMap)) {
+                if (query.includes(key)) { switchSection(section); break; }
+            }
+        });
+
+        // Tab switching within sections
+        document.querySelectorAll('.tabs').forEach(tabGroup => {
+            tabGroup.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabGroup.querySelectorAll('.tab-btn').forEach(b => b.classList
+                        .remove('active'));
+                    btn.classList.add('active');
+                    const parent = tabGroup.closest('.section');
+                    parent.querySelectorAll('.tab-content').forEach(tc => tc.classList
+                        .remove('active'));
+                    const target = parent.querySelector('#tab-' + btn.dataset.tab);
+                    if (target) target.classList.add('active');
+                });
+            });
+        });
+
+        // ==================== MIND MAPS ====================
+        function drawMindMap(containerId, data) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const width = container.clientWidth || 800;
+            const height = data.height || 400;
+            const svgNS = 'http://www.w3.org/2000/svg';
+            let svg = container.querySelector('svg');
+            if (svg) svg.remove();
+
+            svg = document.createElementNS(svgNS, 'svg');
+            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', height);
+            svg.style.display = 'block';
+            container.appendChild(svg);
+
+            const cx = width / 2;
+            const cy = height / 2;
+
+            // Defs for gradients and glow
+            const defs = document.createElementNS(svgNS, 'defs');
+            const glow = document.createElementNS(svgNS, 'filter');
+            glow.setAttribute('id', 'glow');
+            glow.innerHTML =
+                '<feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>';
+            defs.appendChild(glow);
+
+            const shadow = document.createElementNS(svgNS, 'filter');
+            shadow.setAttribute('id', 'shadow');
+            shadow.innerHTML = '<feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.5)"/>';
+            defs.appendChild(shadow);
+            svg.appendChild(defs);
+
+            // Draw center node
+            function drawNode(x, y, text, color, size = 'lg') {
+                const group = document.createElementNS(svgNS, 'g');
+                const w = size === 'lg' ? 130 : size === 'md' ? 100 : 75;
+                const h = size === 'lg' ? 44 : size === 'md' ? 36 : 30;
+                const rx = h / 2;
+
+                const rect = document.createElementNS(svgNS, 'rect');
+                rect.setAttribute('x', x - w / 2);
+                rect.setAttribute('y', y - h / 2);
+                rect.setAttribute('width', w);
+                rect.setAttribute('height', h);
+                rect.setAttribute('rx', rx);
+                rect.setAttribute('fill', color);
+                rect.setAttribute('filter', 'url(#shadow)');
+                group.appendChild(rect);
+
+                const textEl = document.createElementNS(svgNS, 'text');
+                textEl.setAttribute('x', x);
+                textEl.setAttribute('y', y + 5);
+                textEl.setAttribute('text-anchor', 'middle');
+                textEl.setAttribute('fill', '#fff');
+                textEl.setAttribute('font-size', size === 'lg' ? '13' : size === 'md' ? '11' : '10');
+                textEl.setAttribute('font-weight', '700');
+                textEl.setAttribute('font-family', 'Segoe UI, sans-serif');
+                textEl.textContent = text;
+                group.appendChild(textEl);
+
+                return { group, x, y, w, h, rx };
+            }
+
+            function drawLine(x1, y1, x2, y2, color) {
+                const line = document.createElementNS(svgNS, 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                line.setAttribute('stroke', color);
+                line.setAttribute('stroke-width', '2');
+                line.setAttribute('stroke-opacity', '0.5');
+                line.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(line);
+                return line;
+            }
+
+            const center = drawNode(cx, cy, data.center.text, data.center.color, 'lg');
+            svg.appendChild(center.group);
+
+            const numChildren = data.children.length;
+            const radius = Math.min(width, height) * 0.35;
+            const startAngle = -Math.PI / 2 - (Math.PI / numChildren);
+
+            data.children.forEach((child, i) => {
+                const angle = startAngle + (i * (2 * Math.PI / numChildren));
+                const childX = cx + radius * Math.cos(angle);
+                const childY = cy + radius * Math.sin(angle);
+
+                drawLine(cx, cy, childX, childY, child.color);
+                const node = drawNode(childX, childY, child.text, child.color, 'md');
+                svg.appendChild(node.group);
+
+                if (child.subChildren) {
+                    const subRadius = 70;
+                    const subStartAngle = angle - 0.3;
+                    child.subChildren.forEach((sub, j) => {
+                        const subAngle = subStartAngle + (j * 0.6 / Math.max(1, child.subChildren
+                            .length - 1));
+                        const subX = childX + subRadius * Math.cos(subAngle);
+                        const subY = childY + subRadius * Math.sin(subAngle);
+                        drawLine(childX, childY, subX, subY, '#444');
+                        const subNode = drawNode(subX, subY, sub.text, '#2a2a4e', 'sm');
+                        svg.appendChild(subNode.group);
+                    });
+                }
+            });
+        }
+
+        // Home mind map
+        drawMindMap('mindmapHome', {
+            height: 400,
+            center: { text: 'Android Security', color: '#e53935' },
+            children: [
+                { text: 'Fundamentals', color: '#3366cc', subChildren: [{ text: 'APK' }, { text: 'Manifest' },
+                    { text: '4 Components' }, { text: 'Intents' }
+                ] },
+                { text: 'Static Analysis', color: '#ff8f00', subChildren: [{ text: 'JADX' }, { text: 'MobSF' },
+                    { text: 'Secrets' }, { text: 'Smali' }
+                ] },
+                { text: 'Components', color: '#e53935', subChildren: [{ text: 'Activities' }, { text: 'Receivers' },
+                    { text: 'Providers' }, { text: 'Services' }
+                ] },
+                { text: 'Network', color: '#00897b', subChildren: [{ text: 'Burp' }, { text: 'Pinning' },
+                    { text: 'TLS' }, { text: 'Cleartext' }
+                ] },
+                { text: 'Storage', color: '#7b1fa2', subChildren: [{ text: 'SharedPrefs' }, { text: 'SQLite' },
+                    { text: 'Keystore' }, { text: 'Backups' }
+                ] },
+                { text: 'Reverse Eng', color: '#d84315', subChildren: [{ text: 'Frida' }, { text: 'Objection' },
+                    { text: 'ADB' }, { text: 'Root' }
+                ] },
+            ]
+        });
+
+        // Architecture mind map
+        drawMindMap('mmArchitecture', {
+            height: 350,
+            center: { text: 'Android Stack', color: '#3366cc' },
+            children: [
+                { text: 'System Apps', color: '#4fc3f7', subChildren: [{ text: 'Dialer' }, { text: 'Browser' },
+                    { text: 'Camera' }
+                ] },
+                { text: 'Java API Framework', color: '#66bb6a', subChildren: [{ text: 'Activity Mgr' },
+                    { text: 'Content Providers' }, { text: 'View System' }
+                ] },
+                { text: 'Native Libraries', color: '#ffa726', subChildren: [{ text: 'WebKit' }, { text: 'OpenGL' },
+                    { text: 'SQLite' }
+                ] },
+                { text: 'Android Runtime', color: '#ef5350', subChildren: [{ text: 'ART/Dalvik' }, { text: 'Core Libs' }] },
+                { text: 'Linux Kernel', color: '#78909c', subChildren: [{ text: 'Drivers' }, { text: 'Binder IPC' },
+                    { text: 'Power Mgmt' }
+                ] },
+            ]
+        });
+
+        // Component flow mind map
+        drawMindMap('mmComponentFlow', {
+            height: 280,
+            center: { text: 'Intent (IPC)', color: '#e53935' },
+            children: [
+                { text: 'Activity', color: '#42a5f5', subChildren: [{ text: 'startActivity()' }, { text: 'UI Screen' }] },
+                { text: 'Service', color: '#ab47bc', subChildren: [{ text: 'startService()' }, { text: 'Background' }] },
+                { text: 'BroadcastReceiver', color: '#ffb300', subChildren: [{ text: 'sendBroadcast()' },
+                    { text: 'System Events' }
+                ] },
+                { text: 'ContentProvider', color: '#ef5350', subChildren: [{ text: 'query()' }, { text: 'SQLite/File' }] },
+            ]
+        });
+
+        // Permissions mind map
+        drawMindMap('mmPermissions', {
+            height: 320,
+            center: { text: 'Permissions', color: '#7b1fa2' },
+            children: [
+                { text: 'Normal', color: '#66bb6a', subChildren: [{ text: 'INTERNET' }, { text: 'VIBRATE' }] },
+                { text: 'Dangerous', color: '#ef5350', subChildren: [{ text: 'CAMERA' }, { text: 'LOCATION' },
+                    { text: 'CONTACTS' }
+                ] },
+                { text: 'Signature', color: '#ffa726', subChildren: [{ text: 'Same cert' }, { text: 'System apps' }] },
+                { text: 'Custom', color: '#42a5f5', subChildren: [{ text: 'App-defined' }, { text: 'protectionLevel' }] },
+            ]
+        });
+
+        // Decompilation pipeline
+        drawMindMap('mmDecompile', {
+            height: 280,
+            center: { text: 'APK→Code Pipeline', color: '#ff6d00' },
+            children: [
+                { text: 'apktool', color: '#3366cc', subChildren: [{ text: 'Smali' }, { text: 'Resources' }] },
+                { text: 'JADX', color: '#4caf50', subChildren: [{ text: 'Java src' }, { text: 'GUI browse' }] },
+                { text: 'dex2jar', color: '#ffb300', subChildren: [{ text: '.jar file' }, { text: 'JD-GUI' }] },
+                { text: 'MobSF', color: '#e53935', subChildren: [{ text: 'Auto scan' }, { text: 'Report' }] },
+            ]
+        });
+
+        // ==================== QUIZ ====================
+        const quizQuestions = [
+            { q: 'What does android:exported="true" mean?', opts: ['The app is published on Google Play',
+                    'Any app can launch/access this component', 'The APK can be decompiled',
+                    'The component uses encryption'
+                ], correct: 1, explanation: 'exported="true" means the component (Activity, Service, Receiver, or Provider) can be accessed by other applications on the device.' },
+            { q: 'Which tool is used to decompile DEX bytecode to Java?', opts: ['apktool', 'Burp Suite', 'JADX',
+                    'Frida'], correct: 2, explanation: 'JADX converts Android\'s DEX (Dalvik Executable) files back into readable Java source code.' },
+            { q: 'What is the risk of storing auth tokens in SharedPreferences?', opts: ['Nothing, it\'s encrypted by default',
+                    'Tokens expire quickly so it\'s fine', 'Plain XML can be read by root/backup — token theft',
+                    'Only the app can read its own SharedPreferences'
+                ], correct: 2,
+                explanation: 'SharedPreferences stores data as plain XML. With root access or ADB backup, attackers can read the file and steal the token.' },
+            { q: 'What is certificate pinning?', opts: ['Installing a certificate on the device',
+                    'An app only trusting specific certificates/public keys',
+                    'Pinning an app to the recent apps screen', 'Using a self-signed certificate'
+                ], correct: 1,
+                explanation: 'Certificate pinning hardcodes which certificate(s) the app trusts, rejecting all others — including Burp Suite\'s CA certificate.' },
+            { q: 'Is root detection a security vulnerability?', opts: ['Yes, always a critical vulnerability',
+                    'No, it\'s a security control (defense mechanism)', 'Only on rooted devices',
+                    'Only in banking apps'
+                ], correct: 1,
+                explanation: 'Root detection is a security control, not a vulnerability. It\'s designed to protect the app. Bypassing it is a technique testers use, but the detection itself isn\'t a flaw.' },
+            { q: 'What is Intent Redirection?', opts: ['When a user clicks a notification',
+                    'When an app forwards an embedded Intent without validation',
+                    'When two Intents are merged', 'When an Intent has too many extras'
+                ], correct: 1,
+                explanation: 'Intent Redirection occurs when an app receives an Intent that contains another embedded Intent, then forwards it without validation — allowing attackers to control where it goes.' },
+            { q: 'Where does mobile authorization actually happen?', opts: ['Inside the APK code', 'On the device\'s OS',
+                    'Server-side (backend)', 'In SharedPreferences'
+                ], correct: 2,
+                explanation: 'Authorization MUST happen server-side. The mobile app is an untrusted client. Never trust role/permission data sent by the mobile app.' },
+            { q: 'What is Frida used for?', opts: ['Decompiling APKs', 'Dynamic instrumentation at runtime',
+                    'Generating APK signatures', 'Encrypting app data'
+                ], correct: 1,
+                explanation: 'Frida is a dynamic instrumentation toolkit that lets you hook into running processes, monitor function calls, modify return values, and bypass security controls.' },
+            { q: 'What is a dangerous Android permission?', opts: ['INTERNET', 'VIBRATE', 'CAMERA',
+                'ACCESS_NETWORK_STATE'], correct: 2,
+                explanation: 'Dangerous permissions access private user data (CAMERA, LOCATION, CONTACTS, SMS, etc.) and require explicit user approval at runtime. Normal permissions like INTERNET are granted automatically.' },
+            { q: 'What happens if android:allowBackup is true?', opts: ['The app can be installed on SD card',
+                    'App data can be extracted via ADB backup', 'The app backs up automatically every hour',
+                    'Nothing — it\'s the default'
+                ], correct: 1,
+                explanation: 'When allowBackup="true", anyone with ADB access can create a full backup of the app\'s data directory using adb backup, potentially extracting sensitive information.' },
+            { q: 'How would you bypass certificate pinning during testing?', opts: ['Delete the certificate from the APK',
+                    'Use Frida/Objection to hook SSL verification methods',
+                    'Reinstall the app without pinning', 'Use HTTP instead of HTTPS'
+                ], correct: 1,
+                explanation: 'Frida and Objection can hook into the app\'s SSL/TLS verification methods at runtime, bypassing pinning without modifying the APK. Objection\'s "android sslpinning disable" command automates this.' },
+            { q: 'What is the difference between Authentication and Authorization?', opts: ['They are the same thing',
+                    'Auth = who you are; Authz = what you can do',
+                    'Auth = what you can do; Authz = who you are', 'Auth is client-side, Authz is server-side'
+                ], correct: 1,
+                explanation: 'Authentication verifies identity ("Who are you?"). Authorization determines permissions ("What can you access/do?"). Both should be enforced server-side.' },
+            { q: 'What is BOLA/IDOR?', opts: ['A type of Android malware', 'Accessing another user\'s data by changing a resource ID',
+                    'Breaking encryption', 'Bypassing biometric lock'
+                ], correct: 1,
+                explanation: 'Broken Object Level Authorization (BOLA) / Insecure Direct Object Reference (IDOR) occurs when you can access another user\'s resources by simply changing an ID in the request.' },
+            { q: 'Can client-side authentication controls be trusted?', opts: ['Yes, Android sandbox prevents tampering',
+                    'Only if the app uses ProGuard', 'No — the app is an untrusted client',
+                    'Only on non-rooted devices'
+                ], correct: 2,
+                explanation: 'Client-side controls can always be bypassed via reverse engineering, Frida hooking, or APK modification. The backend must be the single source of truth for all security decisions.' },
+            { q: 'What is the purpose of the Android Keystore?', opts: ['To store user passwords in plain text',
+                    'Hardware-backed secure key storage (TEE)', 'To backup app data to Google Drive',
+                    'To encrypt APK files'
+                ], correct: 1,
+                explanation: 'Android Keystore provides hardware-backed (TEE — Trusted Execution Environment) storage for cryptographic keys. Keys never leave the secure hardware.' },
+        ];
+
+        let currentQuiz = 0;
+        let quizScore = 0;
+        let quizAnswered = false;
+        document.getElementById('quizMax').textContent = quizQuestions.length;
+        document.getElementById('quizTotal').textContent = quizQuestions.length;
+
+        function loadQuiz() {
+            quizAnswered = false;
+            const q = quizQuestions[currentQuiz];
+            document.getElementById('quizQuestion').textContent = q.q;
+            document.getElementById('quizFeedback').innerHTML = '';
+            document.getElementById('quizFeedback').className = 'quiz-feedback';
+            document.getElementById('nextQuizBtn').style.display = 'none';
+            document.getElementById('quizCurrent').textContent = currentQuiz + 1;
+            document.getElementById('quizProgress').style.width = ((currentQuiz) / quizQuestions.length * 100) + '%';
+
+            const optsContainer = document.getElementById('quizOptions');
+            optsContainer.innerHTML = '';
+            q.opts.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.textContent = opt;
+                btn.addEventListener('click', () => answerQuiz(i, btn));
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function answerQuiz(selected, btn) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+            const q = quizQuestions[currentQuiz];
+            const allBtns = document.querySelectorAll('.quiz-option');
+
+            allBtns.forEach(b => b.disabled = true);
+            if (selected === q.correct) {
+                btn.classList.add('correct');
+                quizScore++;
+                document.getElementById('quizScore').textContent = quizScore;
+                document.getElementById('quizFeedback').innerHTML = '✅ Correct! ' + q.explanation;
+                document.getElementById('quizFeedback').className = 'quiz-feedback correct-fb';
+            } else {
+                btn.classList.add('wrong');
+                allBtns[q.correct].classList.add('correct');
+                document.getElementById('quizFeedback').innerHTML = '❌ Incorrect. ' + q.explanation;
+                document.getElementById('quizFeedback').className = 'quiz-feedback wrong-fb';
+            }
+
+            document.getElementById('quizProgress').style.width = ((currentQuiz + 1) / quizQuestions.length * 100) + '%';
+            document.getElementById('nextQuizBtn').style.display = 'inline-block';
+            document.getElementById('nextQuizBtn').textContent =
+                currentQuiz < quizQuestions.length - 1 ? 'Next Question →' : '🎉 Finish Quiz';
+        }
+
+        function nextQuiz() {
+            currentQuiz++;
+            if (currentQuiz >= quizQuestions.length) {
+                currentQuiz = 0;
+                quizScore = 0;
+                document.getElementById('quizScore').textContent = '0';
+                document.getElementById('quizProgress').style.width = '0%';
+            }
+            loadQuiz();
+        }
+
+        loadQuiz();
+
+        // ==================== FLASHCARDS ====================
+        const flashcards = [
+            { front: 'What are the 4 Android components?', back: '1. Activity (UI screen)\n2. Service (background)\n3. Broadcast Receiver (event listener)\n4. Content Provider (data access)' },
+            { front: 'Explicit vs Implicit Intent?', back: 'Explicit = targets a specific component by class name.\nImplicit = declares an action, system decides who handles it.' },
+            { front: 'What is android:exported?', back: 'When true, the component can be accessed by other apps. Always check this during pentesting — it\'s the #1 thing to look for in the Manifest.' },
+            { front: 'APK file contents?', back: 'ZIP archive containing:\n• AndroidManifest.xml\n• classes.dex (bytecode)\n• res/ (resources)\n• lib/ (native .so)\n• META-INF/ (signatures)\n• assets/ (raw files)' },
+            { front: 'Dangerous vs Normal permissions?', back: 'Normal: granted automatically (INTERNET, VIBRATE).\nDangerous: require user approval (CAMERA, CONTACTS, LOCATION, SMS, STORAGE).' },
+            { front: 'Static vs Dynamic Analysis?', back: 'Static = analyzing code without running (JADX, MobSF).\nDynamic = analyzing behavior while running (Frida, Burp, Objection).\nUse BOTH for thorough testing.' },
+            { front: 'Why does HTTPS traffic not appear in Burp?', back: 'Most common reasons:\n1. Certificate pinning\n2. Proxy not configured\n3. Android 7+ needs system CA (not user)\n4. Network Security Config blocks user CAs\n5. Non-HTTP protocol (WebSocket, gRPC)' },
+            { front: 'JWT security testing?', back: '1. Try alg:none attack\n2. Modify role/permissions in payload\n3. Change sub (user ID) — IDOR\n4. Test expiry manipulation\n5. Key confusion (RS256→HS256)\n6. Check if signature is actually validated' },
+            { front: 'Frida/Objection bypass commands?', back: 'Frida: frida -U -l script.js com.app\nObjection: objection -g com.app explore\n→ android sslpinning disable\n→ android root disable\n→ android hooking watch class X' },
+            { front: 'Deep link vulnerability types?', back: '1. Auth bypass (direct to protected screen)\n2. Sensitive data in URI parameters\n3. Intent redirection via embedded Intent\n4. WebView XSS if link opens in WebView\n5. Schema hijacking by malicious app' },
+            { front: 'Where NOT to store sensitive data?', back: '❌ Plain SharedPreferences\n❌ Unencrypted SQLite\n❌ External storage (/sdcard/)\n❌ Logcat\n❌ Cache/temp directories\n✅ Use EncryptedSharedPreferences + Keystore' },
+            { front: 'Golden rule of mobile security?', back: 'THE BACKEND IS THE SOURCE OF TRUTH.\nNever trust the mobile client for:\n• Authentication ✅\n• Authorization ✅\n• Input validation ✅\n• Business logic ✅\nThe app is an untrusted client.' },
+        ];
+
+        const flashcardGrid = document.getElementById('flashcardGrid');
+        flashcards.forEach((fc, i) => {
+            const card = document.createElement('div');
+            card.className = 'flashcard';
+            card.innerHTML = `
+            <div class="flashcard-inner">
+              <div class="flashcard-front">
+                <span>${fc.front}</span>
+                <span class="hint">Click to flip</span>
+              </div>
+              <div class="flashcard-back">
+                <span style="white-space:pre-line">${fc.back}</span>
+              </div>
+            </div>`;
+            card.addEventListener('click', () => card.classList.toggle('flipped'));
+            flashcardGrid.appendChild(card);
+        });
+
+        // ==================== INIT ====================
+        console.log('🔴 Android Security Academy — Ready!');
+        console.log('📚 Navigate using the tabs above.');
+        console.log('🎯 Try the Quiz section to test your knowledge!');
+        console.log('🔥 Check out Scenarios for interview prep walkthroughs.');
+    </script>
+</body>
+</html>
